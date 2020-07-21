@@ -6,15 +6,14 @@ TODO: Global description - include figure of the modules
 
 ## Dependencies 
 
-* [minimap2](https://github.com/lh3/minimap2). Example using conda: 
-  * Create the environment `conda create -p my_envs_directory/minimap2_2_2.17 minimap2=2.17`
-  * Activate the environment `conda activate my_envs_directory/minimap2_2_2.17`
-* [seqwish](https://github.com/ekg/seqwish). Example using conda: 
-  * Create the environment `conda create -p my_envs_directory/seqwish_0.4.1 seqwish=0.4.1`
-  * Activate the environment `conda activate my_envs_directory/seqwish_0.4.1`
-* [vg](https://github.com/vgteam/vg). Example using conda: 
-  * Create the environment `conda create -p my_envs_directory/vg_1.25.0 vg=1.25.0`
-  * Activate the environment `conda activate my_envs_directory/vg_1.25.0`
+* [minimap2](https://github.com/lh3/minimap2). 
+* [seqwish](https://github.com/ekg/seqwish). 
+* [vg](https://github.com/vgteam/vg). 
+  
+Create an environnement for all the dependencies: 
+`conda create -p env_metacatalogue seqwish=0.4.1 minimap2=2.17 vg=1.25.0`
+`conda activate env_metacatalogue`
+
 
 ## Module descriptions
 
