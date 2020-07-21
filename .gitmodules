@@ -1,6 +1,0 @@
-[submodule "thirdparty/minimap2"]
-	path = thirdparty/minimap2
-	url = https://github.com/lh3/minimap2
-[submodule "thirdparty/seqwish"]
-	path = thirdparty/seqwish
-	url = https://github.com/ekg/seqwish
