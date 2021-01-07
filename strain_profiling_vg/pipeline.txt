@@ -1,0 +1,33 @@
+# 0. prepare references
+ls -d references/*.fna > list_references_mock.txt
+
+# 1. genes prediction
+INPUT = a single fasta file or a list of directory to fasta files + output folder name + length of extension at extremities
+genes_prediction.py -s list_references_mock.txt -o predicted_genes -l 75
+
+# 2. genes clustering
+mkdir clusters
+cd-hit-est -i predicted_genes/all_genes.fasta -o clusters/all_genes_clusters -c 0.95 -aS 0.90 -g 1 -d 0 -M 0 -T 0 -G 0
+
+# 3.1. graphs construction
+mkdir initial_graphs
+graphs_construction.py -s predicted_genes/all_genes_extended.fasta -c clusters/all_genes_clusters.clstr -o initial_graphs
+
+# 3.2. graphs concatenation (all in one)
+concat_graphs.py -i final_graphs -s 1000
+vg view final_graphs/all_graphs.vg > final_graphs/all_graphs.gfa
+
+# 3.3. graph index
+vg prune final_graphs/all_graphs.vg | vg index -g final_graphs/all_graphs.gcsa -
+vg index -x final_graphs/all_graphs.xg final_graphs/all_graphs.vg
+vg snarls final_graphs/all_graphs.vg > final_graphs/all_graphs.snarls
+
+# 4. mapping
+vg mpmap -x final_graphs/all_graphs.xg -g final_graphs/all_graphs.gcsa -s final_graphs/all_graphs.snarls -f /groups/genscale/kdasilva/project_mock/reads/mock1a_2018-4545_CCGCGGTT-CTAGCGCT-AHYK32BBXX_L003_R1.fastq.gz -f /groups/genscale/kdasilva/project_mock/reads/mock1a_2018-4545_CCGCGGTT-CTAGCGCT-AHYK32BBXX_L003_R2.fastq.gz -t 24 -M 10 -m -L 0 > mapping/mapping_mock1a_complete_allgraphs_20201119.gamp 
+vg view -j -K mapping/mapping_mock1a_complete_allgraphs_20201119.gamp  > mapping/mapping_mock1a_complete_allgraphs_20201119.json
+
+# 5. Reads attribution
+json2csv.py -g final_graphs/all_graphs.gfa -m mapping/mapping_mock1a_complete_allgraphs_20201119.json -p initial_graphs/dict_clusters.pickle -o counting_tables/table_mock1a_complete_allgraphs_20201119
+
+# 6. Strains relative abundances
+compute_strains_abundance.py (en cours)
