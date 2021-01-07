@@ -54,15 +54,15 @@ def clstr2dict(clstr_file: str):
                     d_clusters[cluster_name]['len_rep'] = int(split_line[1][:-3])
     return d_clusters
 
-def worker(q: Queue):
+def worker(q: Queue, d_clusters, d_IdToSeq, out_dir: str):
     while True:
         cluster_name = q.get()
         if not cluster_name:
             q.put(None)
             break
-        cluster2graph(cluster_name)
+        cluster2graph(cluster_name, d_clusters, d_IdToSeq, out_dir)
 
-def cluster2graph(cluster_name: str):
+def cluster2graph(cluster_name: str, d_clusters, d_IdToSeq, out_dir: str):
 
     '''
     graph construction
@@ -150,7 +150,7 @@ if __name__ == "__main__":
         q = Queue() 
 
         # construct graph for each cluster in parallel
-        processes = Pool(initializer=worker, initargs=(q,))
+        processes = Pool(initializer=worker, initargs=(q, d_clusters, d_IdToSeq, out_dir))
 
         # fill the queue with the clusters to process
         for cluster_name in d_clusters:
