@@ -1,7 +1,0 @@
-/home/kdasilva/data/genomes/ecoli_k12_mg1655.fasta
-/home/kdasilva/data/genomes/ecoli_iai39.fasta
-/home/kdasilva/data/genomes/ecoli_o104h4_2011c-3493.fasta
-/home/kdasilva/data/genomes/ecoli_o157h7_sakai.fasta
-/home/kdasilva/data/genomes/ecoli_se15.fasta
-/home/kdasilva/data/genomes/ecoli_o157h16_santai.fasta
-/home/kdasilva/data/genomes/ecoli_RM8426.fasta
