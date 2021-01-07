@@ -30,16 +30,17 @@ def setup_logger(name, log_path):
     l.setLevel(logging.DEBUG)
     l.addHandler(fileHandler)
 
-def worker(q: Queue):
+def worker(q: Queue, out_dir: str, len_extend: int):
     while True:
         fasta_file = q.get()
         if not fasta_file:
             q.put(None)
             break
-        predict_genes(fasta_file)
+        predict_genes(fasta_file, out_dir, len_extend)
 
-def predict_genes(fasta_file: str):
 
+def predict_genes(fasta_file: str, out_dir: str, len_extend: int):
+    print(f"out_dir is {out_dir}")
     fasta_basename = os.path.basename(os.path.splitext(fasta_file)[0])
     subprocess.check_call(f"prodigal -i {fasta_file} -o {out_dir}/predGenes_{fasta_basename}.txt -d {out_dir}/predGenes_{fasta_basename}.fasta",shell=True)
     p1 = subprocess.Popen(["grep",">",f"{out_dir}/predGenes_{fasta_basename}.fasta"], stdout=subprocess.PIPE)
@@ -112,7 +113,7 @@ if __name__ == "__main__":
         q = Queue() 
 
         # predict genes for each fasta in parallel
-        processes = Pool(initializer=worker, initargs=(q,))
+        processes = Pool(initializer=worker, initargs=(q, out_dir, len_extend))
 
         # fill the queue with the files to process
         if in_sequences.endswith(".fasta") or in_sequences.endswith(".fna"):
