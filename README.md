@@ -5,13 +5,13 @@ TODO: Global description - include figure of the modules
 
 
 ## Dependencies 
-
+* [prodigal](https://github.com/hyattpd/Prodigal)
 * [minimap2](https://github.com/lh3/minimap2). 
 * [seqwish](https://github.com/ekg/seqwish). 
 * [vg](https://github.com/vgteam/vg). 
   
 Create an environnement for all the dependencies: 
-`conda create -p env_metacatalogue seqwish=0.4.1 minimap2=2.17 vg=1.25.0`
+`conda create -p env_metacatalogue prodigal=2.6.3 seqwish=0.4.1 minimap2=2.17 vg=1.25.0`
 `conda activate env_metacatalogue`
 
 
