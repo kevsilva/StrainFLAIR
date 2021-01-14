@@ -80,13 +80,14 @@ then
     len_extension=75            # Len of the sequences on the left and right part of each predicted gene, added to the indexation graph.
     directory_output=""         # Name of the directory in which all files are output.
     
-    cdhit_c=0.95                # TODO: comment here + argument
-    cdhit_aS=0.90               # TODO: comment here + argument
-    cdhit_g=1                   # TODO: comment here + argument
-    cdhit_d=0                   # TODO: comment here + argument
-    cdhit_M=0                   # TODO: comment here + argument
-    cdhit_T=0                   # TODO: comment here + argument
-    cdhit_G=0                   # TODO: comment here + argument
+    #### CDHIT parameters. Could be changed directly here by user. Do not need to be interactive ###
+    cdhit_c=0.95               
+    cdhit_aS=0.90              
+    cdhit_g=1                  
+    cdhit_d=0                  
+    cdhit_M=0                  
+    cdhit_T=0                  
+    cdhit_G=0                  
 
 
     function help_index {

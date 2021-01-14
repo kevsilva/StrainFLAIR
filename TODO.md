@@ -1,4 +1,4 @@
-- [ ] Pipeline indexation
+- [x] Pipeline indexation
 - [ ] Pipeline query
 - [ ] README pipelines
 - [ ] README per module
@@ -9,6 +9,9 @@
   - [ ] minimap2
   - [ ] seqwish
   - [ ] vg
+- [ ] Image Docker
+
+
 
 
 
