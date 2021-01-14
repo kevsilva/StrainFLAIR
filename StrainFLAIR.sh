@@ -1,10 +1,17 @@
 #!/bin/bash
 #*****************************************************************************
-#  TODO: Short description of StrainPROG
+#  StrainFLAIR (STRAIN-level proFiLing using vArIation gRaph) is a tool for 
+#  strain identification and quantification that uses variation graph 
+#  representation of genes sequences. The input is a collection of complete 
+#  genomes, draft genomes or metagenome-assembled genomes from which genes 
+#  will be predicted. StrainFLAIR is sub-divided into two main parts: first, 
+#  an indexing step that stores clusters of reference genes into variation 
+#  graphs, and then, a query step using mapping of metagenomic reads to 
+#  infere strain-level abundances in the queried sample.
 #
 #  Authors: Kevin Da Silva - Pierre Peterlongo
 #
-#  TODO: Licence
+#  AGPL-3.0 License
 #*****************************************************************************
 
 
@@ -80,14 +87,13 @@ then
     len_extension=75            # Len of the sequences on the left and right part of each predicted gene, added to the indexation graph.
     directory_output=""         # Name of the directory in which all files are output.
     
-    #### CDHIT parameters. Could be changed directly here by user. Do not need to be interactive ###
-    cdhit_c=0.95               
-    cdhit_aS=0.90              
-    cdhit_g=1                  
-    cdhit_d=0                  
-    cdhit_M=0                  
-    cdhit_T=0                  
-    cdhit_G=0                  
+    cdhit_c=0.95                # TODO: comment here + argument
+    cdhit_aS=0.90               # TODO: comment here + argument
+    cdhit_g=1                   # TODO: comment here + argument
+    cdhit_d=0                   # TODO: comment here + argument
+    cdhit_M=0                   # TODO: comment here + argument
+    cdhit_T=0                   # TODO: comment here + argument
+    cdhit_G=0                   # TODO: comment here + argument
 
 
     function help_index {
@@ -262,7 +268,7 @@ then
     # Graphs Construction
     echo "${yellow}GRAPHS CONSTRUCTION$reset"
     
-    cmd="mkdir ${directory_output}/initial_graphs"
+    cmd="mkdir ${directory_output}/graphs"
     echo $green$cmd$cyan
     $cmd
     if [ $? -ne 0 ]
@@ -271,7 +277,7 @@ then
         exit 1
     fi
     
-    cmd="python $EDIR/scripts/graphs_construction.py -s ${directory_output}/all_genes_extended.fasta -c ${directory_output}/clusters/all_genes_clusters.clstr -o ${directory_output}/initial_graphs"
+    cmd="python $EDIR/scripts/graphs_construction.py -s ${directory_output}/all_genes_extended.fasta -c ${directory_output}/clusters/all_genes_clusters.clstr -o ${directory_output}/graphs"
     echo $green$cmd$cyan
     T="$(date +%s)"
     $cmd
@@ -286,9 +292,9 @@ then
     
     
     
-    # Graphs Concatenation TODO: tester
+    # Graphs Concatenation
     echo "${yellow}GRAPHS CONCATENATION$reset"
-    cmd="python $EDIR/scripts/concat_graphs.py -i ${directory_output}/initial_graphs -s 1000"
+    cmd="python $EDIR/scripts/concat_graphs.py -i ${directory_output}/graphs -s 1000"
     echo $green$cmd$cyan
     T="$(date +%s)"
     $cmd
@@ -300,12 +306,12 @@ then
     T="$(($(date +%s)-T))"
     echo "$yellow Graphs Concatenation time in seconds: ${T}$reset"
     
-    # From vg format to gfa format. TODO TESTER
-    echo "${yellow}VG TOO GFA FORMAT$reset"
-    cmd="vg view ${directory_output}/initial_graphs/all_graphs.vg" #> ${directory_output}/initial_graphs/all_graphs.gfa
-    echo "$green$cmd > ${directory_output}/initial_graphs/all_graphs.gfa $cyan"
+    # From vg format to gfa format. 
+    echo "${yellow}VG TO GFA FORMAT$reset"
+    cmd="vg view ${directory_output}/graphs/all_graphs.vg" #> ${directory_output}/graphs/all_graphs.gfa
+    echo "$green$cmd > ${directory_output}/graphs/all_graphs.gfa $cyan"
     T="$(date +%s)"
-    $cmd > ${directory_output}/initial_graphs/all_graphs.gfa
+    $cmd > ${directory_output}/graphs/all_graphs.gfa
     if [ $? -ne 0 ]
     then
         echo "$red there was a problem with the Graphs format modification$reset"
@@ -314,32 +320,29 @@ then
     T="$(($(date +%s)-T))"
     echo "$yellow Graphs format modification time in seconds: ${T}$reset"
     
-    # Graph Index. TODO: generate commands.
-    # vg prune final_graphs/all_graphs.vg | vg index -g final_graphs/all_graphs.gcsa -
-    # vg index -x final_graphs/all_graphs.xg final_graphs/all_graphs.vg
-    # vg snarls final_graphs/all_graphs.vg > final_graphs/all_graphs.snarls
+    # Graph Index.
     T="$(date +%s)"
-    cmd="vg prune ${directory_output}/initial_graphs/all_graphs.vg | vg index -g ${directory_output}/initial_graphs/all_graphs.gcsa -"
-    echo $green$cmd$cyan
+    cmd="vg prune ${directory_output}/graphs/all_graphs.vg" #| vg index -g ${directory_output}/graphs/all_graphs.gcsa -
+    echo "$green$cmd | vg index -g ${directory_output}/graphs/all_graphs.gcsa - $cyan"
+    $cmd | vg index -g ${directory_output}/graphs/all_graphs.gcsa -
+    if [ $? -ne 0 ]
+    then
+        echo "$red there was a problem with the Graphs Indexation (GCSA file)$reset"
+        exit 1
+    fi
+    cmd="vg index -x ${directory_output}/graphs/all_graphs.xg ${directory_output}/graphs/all_graphs.vg"
     $cmd
     if [ $? -ne 0 ]
     then
-        echo "$red there was a problem with the Graphs Indexation 1/3$reset"
+        echo "$red there was a problem with the Graphs Indexation (XG file)$reset"
         exit 1
     fi
-    cmd="vg index -x ${directory_output}/initial_graphs/all_graphs.xg ${directory_output}/initial_graphs/all_graphs.vg"
-    $cmd
+    cmd="vg snarls ${directory_output}/graphs/all_graphs.vg" # > ${directory_output}/graphs/all_graphs.snarls
+    echo "$green$cmd > ${directory_output}/graphs/all_graphs.snarls $cyan"
+    $cmd > ${directory_output}/graphs/all_graphs.snarls
     if [ $? -ne 0 ]
     then
-        echo "$red there was a problem with the Graphs Indexation 2/3$reset"
-        exit 1
-    fi
-    cmd="vg snarls ${directory_output}/initial_graphs/all_graphs.vg" # > ${directory_output}/initial_graphs/all_graphs.snarls
-    echo "$cmd > ${directory_output}/initial_graphs/all_graphs.snarls"
-    $cmd > ${directory_output}/initial_graphs/all_graphs.snarls
-    if [ $? -ne 0 ]
-    then
-        echo "$red there was a problem with the Graphs Indexation 3/3$reset"
+        echo "$red there was a problem with the Graphs Indexation (SNARLS file)$reset"
         exit 1
     fi
 fi # END INDEX
@@ -357,5 +360,192 @@ fi # END INDEX
 #-----------------------------------------------------------------------------
 if [[ $main ==  "query" ]]
 then
+    graph_data=""               # pangenome graph in GFA format
+    json_data=""                # mapping output in json format
+    clusters_data=""            # pickle containing the dictionary for the clusters
+    directory_output=""         # Name of the directory in which all files are output.
+    threshold=0.5               # threshold on the proportion of detected genes
+	
+    function help_query {
+        echo " ******************"
+        echo " *** HELP query ***"
+        echo " ******************"
+        echo "$0 query: query of reads on a pangenome graph."
+        echo "Version "$version
+        echo "Usage: ./$0 query -g graph -m mapping_output -p dict_clusters -o output_directory_name [OPTIONS]"
+        echo -e "MANDATORY"
+        echo -e "\t -g <file name of a graph in GFA format>"
+	echo -e "\t -m <mapping output in json format>"
+	echo -e "\t -p <pickle file containing the dictionary of clusters and their genes>"
+
+        echo -e "\t -o <directory_output_name>. This directory must not exist. It is created by the program. All results are stored in this directory"
+
+        echo -e "\nOPTIONS"
+        echo -e "\t -t value <float value between [0-1]>"
+        echo -e "\t\t Set the threshold on propotion of detected specific genes."
+        echo -e "\t\t Default=0.5"
+
+        echo -e "\t -h"
+        echo -e "\t\t Prints this message and exit\n"
+    
+        echo "Any further question: read the readme file or contact the development team"
+    }
+
+    shift # pass "query"
+    while :; do
+        case $1 in
+        -g) 
+            if [ "$2" ] && [ ${2:0:1} != "-" ] ; then # checks that there exists a second value and its is not the start of the next option
+                graph_data=$2
+                shift
+            else
+                die 'ERROR: "'$1'" option requires a non-empty option argument.'
+            fi
+            ;;
+        -m) 
+            if [ "$2" ] && [ ${2:0:1} != "-" ] ; then # checks that there exists a second value and its is not the start of the next option
+                json_data=$2
+                shift
+            else
+                die 'ERROR: "'$1'" option requires a non-empty option argument.'
+            fi
+            ;;
+
+        -p) 
+            if [ "$2" ] && [ ${2:0:1} != "-" ] ; then # checks that there exists a second value and its is not the start of the next option
+                clusters_data=$2
+                shift
+            else
+                die 'ERROR: "'$1'" option requires a non-empty option argument.'
+            fi
+            ;;
+	-o) 
+            if [ "$2" ] && [ ${2:0:1} != "-" ] ; then # checks that there exists a second value and its is not the start of the next option
+                directory_output=$2
+                shift
+            else
+                die 'ERROR: "'$1'" option requires a non-empty option argument.'
+            fi
+            ;;
+       -t) 
+            if [ "$2" ] && [ ${2:0:1} != "-" ] ; then # checks that there exists a second value and its is not the start of the next option
+                threshold=$2
+                shift
+            else
+                die 'ERROR: "'$1'" option requires a non-empty option argument.'
+            fi
+            ;;
+        -h|-\?|--help)
+            help_index
+            exit 
+            ;;
+
+        -?*)
+            printf 'WARN: Unknown option (exit): %s\n' "$1" >&2
+            exit 1
+            ;;
+
+        :)
+            echo "Option $1 requires an argument." >&2
+            exit 1
+            ;;
+            --)              # End of all options.
+                shift
+                break
+                ;;
+            -?*)
+                printf 'WARN: Unknown option (ignored): %s\n' "$1" >&2
+                ;;
+            *)               # Default case: No more options, so break out of the loop.
+                break
+        esac
+        shift
+    done
+    
+    # --------------
+    # CHECK OPTIONS
+    # --------------
+    if [ -z "${graph_data}" ]; then
+        echo "$red Error: You must provide a graph (gfa format) (-g)"
+        help_query
+        echo $reset
+        exit 1
+    fi
+    
+    if [ -z "${json_data}" ]; then
+        echo "$red Error: You must provide a mapping file (json format) (-m)"
+        help_query
+        echo $reset
+        exit 1
+    fi
+
+    if [ -z "${clusters_data}" ]; then
+        echo "$red Error: You must provide a clusters dictionary (pickle file) (-p)"
+        help_query
+        echo $reset
+        exit 1
+    fi
+
+    if [ -z "${directory_output}" ]; then
+        echo "$red Error: You must provide output directory name (-o)"
+        help_query
+        echo $reset
+        exit 1
+    fi
+    
+    if [ -f ${directory_output} ] || [ -d ${directory_output} ]; then
+        echo "$red Error: ${directory_output} already exists"
+        help_query
+        echo $reset
+        exit 1
+    fi
+    mkdir ${directory_output}
+    
+    # --------------
+    # RECAP OPTIONS
+    # --------------
+    echo -e "$yellow"
+    echo "QUERY OPTIONS:"
+    echo "-Graph file ${graph_data}"
+    echo "-Mapping file ${json_data}"
+    echo "-Clusters dictionary ${clusters_data}"
+    echo "-Output results in directory ${directory_output}"
+    echo "-Threshold on proportion of detected genes ${threshold}"
+    echo -e "$reset"
+    
+    
+    # --------------
+    # GENE-LEVEL
+    # --------------
+    
+    echo "${yellow}GENE-LEVEL ABUNDANCES$reset"
+    cmd="python $EDIR/scripts/json2csv.py -g ${graph_data} -m ${json_data} -p ${clusters_data} -o ${directory_output}/gene_level_results"
+    echo $green$cmd$cyan
+    T="$(date +%s)"
+    $cmd
+    if [ $? -ne 0 ]
+    then
+        echo "$red there was a problem with the gene-level table generation$reset"
+        exit 1
+    fi
+    T="$(($(date +%s)-T))"
+    echo "$yellow Gene-level abundances computation time in seconds: ${T}$reset"
+
+    # --------------
+    # STRAIN-LEVEL
+    # --------------
+    
+    echo "${yellow}STRAIN-LEVEL ABUNDANCES$reset"
+    cmd="python $EDIR/scripts/compute_strains_abundances.py -i ${directory_output}/gene_level_results.csv -o ${directory_output} -t ${threshold}"
+    echo $green$cmd$cyan
+    T="$(date +%s)"
+    $cmd
+    if [ $? -ne 0 ]
+    then
+        echo "$red there was a problem with the strain-level table generation$reset"
+        exit 1
+    fi
+    T="$(($(date +%s)-T))"
+    echo "$yellow Strain-level abundances computation time in seconds: ${T}$reset"
     
 fi # END QUERY
