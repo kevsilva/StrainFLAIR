@@ -12,8 +12,11 @@ TODO: Global description - include figure of the modules
 * [pandas](https://pandas.pydata.org/)
 
 Create an environnement for all the dependencies: 
-`conda create -p env_metacatalogue prodigal=2.6.3 seqwish=0.4.1 minimap2=2.17 vg=1.25.0 pandas`
-`conda activate env_metacatalogue`
+
+````bash
+conda create -p env_metacatalogue prodigal=2.6.3 seqwish=0.4.1 minimap2=2.17 vg=1.25.0 pandas
+conda activate env_metacatalogue
+````
 
 
 ## Module descriptions
