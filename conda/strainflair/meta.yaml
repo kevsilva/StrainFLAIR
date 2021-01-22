@@ -7,7 +7,7 @@ source:
 
 requirements:
   build:
-    - python==3.6.5
+    - python==3.9.1
   run:
     - seqwish==0.4.1
     - minimap2==2.17
