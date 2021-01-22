@@ -1,0 +1,29 @@
+package:
+  name: strainflair
+  version: 0.0.1
+
+source:
+  path: ../../
+
+requirements:
+  build:
+    - python==3.6.5
+  run:
+    - seqwish==0.4.1
+    - minimap2==2.17
+    - python==3.6.5
+    - pandas==1.2.1
+    - vg==1.25.0
+    - prodigal==2.6.3
+    - cd-hit==4.8.1
+
+about:
+  home: https://github.com/kevsilva/StrainFLAIR
+  license: GNU Affero General Public License v3.0
+  summary: StrainFLAIR (STRAIN-level proFiLing using vArIation gRaph) is a tool for strain identification and quantification that uses variation graph representation of genes sequences.
+  dev_url: https://github.com/kevsilva/StrainFLAIR
+
+extra:
+  maintainers:
+    - Kévin Da Silva: kevin.da-silva@inria.fr
+    - Pierre Peterlongo: pierre.peterlongo@inria.fr
