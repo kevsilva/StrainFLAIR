@@ -1,0 +1,5 @@
+from .compute_strains_abundance import compute_strains_abundance_main
+from .concat_graphs import concat_graphs_main
+from .genes_prediction import genes_prediction_main
+from .json2csv import json2csv_main
+from .graphs_construction import graphs_construction_main
