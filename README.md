@@ -14,12 +14,17 @@ StrainFLAIR is composed of several modules. Each module of the pipeline is descr
 * [vg](https://github.com/vgteam/vg)
 * [pandas](https://pandas.pydata.org/)
 
-Create an environnement for all the dependencies: 
+## Install (TODO - finish)
 
-````bash
-conda create -p env_sflair prodigal=2.6.3 cd-hit=4.8.1 seqwish=0.4.1 minimap2=2.17 vg=1.25.0 pandas
-conda activate env_sflair
-````
+```
+ git clone https://github.com/kevsilva/StrainFLAIR
+ cd StrainFLAIR
+ conda env create -p Strain --file env.yml
+ conda activate ./Strain
+ python setup.py install
+```
+
+
 
 ## Usage
 
