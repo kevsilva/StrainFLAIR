@@ -57,7 +57,6 @@ check_bin "vg"
 #-----------------------------------------------------------------------------
 Tstart="$(date +%s)"
 version="0.0.1"
-EDIR=$( python -c "import os.path; print(os.path.dirname(os.path.realpath(\"${BASH_SOURCE[0]}\")))" )
 
 
 #-----------------------------------------------------------------------------
@@ -225,7 +224,7 @@ then
     
     # Gene Prediction
     echo "${yellow}GENE PREDICTION$reset"
-    cmd="python $EDIR/scripts/genes_prediction.py -s ${input_data} -o ${directory_output} -l ${len_extension}"
+    cmd="genes_prediction -s ${input_data} -o ${directory_output} -l ${len_extension}"
     echo $green$cmd$cyan
     T="$(date +%s)"
     $cmd
@@ -277,7 +276,7 @@ then
         exit 1
     fi
     
-    cmd="python $EDIR/scripts/graphs_construction.py -s ${directory_output}/all_genes_extended.fasta -c ${directory_output}/clusters/all_genes_clusters.clstr -o ${directory_output}/graphs"
+    cmd="graphs_construction -s ${directory_output}/all_genes_extended.fasta -c ${directory_output}/clusters/all_genes_clusters.clstr -o ${directory_output}/graphs"
     echo $green$cmd$cyan
     T="$(date +%s)"
     $cmd
@@ -294,7 +293,7 @@ then
     
     # Graphs Concatenation
     echo "${yellow}GRAPHS CONCATENATION$reset"
-    cmd="python $EDIR/scripts/concat_graphs.py -i ${directory_output}/graphs -s 1000"
+    cmd="concat_graphs -i ${directory_output}/graphs -s 1000"
     echo $green$cmd$cyan
     T="$(date +%s)"
     $cmd
@@ -519,7 +518,7 @@ then
     # --------------
     
     echo "${yellow}GENE-LEVEL ABUNDANCES$reset"
-    cmd="python $EDIR/scripts/json2csv.py -g ${graph_data} -m ${json_data} -p ${clusters_data} -o ${directory_output}/gene_level_results"
+    cmd="json2csv -g ${graph_data} -m ${json_data} -p ${clusters_data} -o ${directory_output}/gene_level_results"
     echo $green$cmd$cyan
     T="$(date +%s)"
     $cmd
@@ -536,7 +535,7 @@ then
     # --------------
     
     echo "${yellow}STRAIN-LEVEL ABUNDANCES$reset"
-    cmd="python $EDIR/scripts/compute_strains_abundances.py -i ${directory_output}/gene_level_results.csv -o ${directory_output} -t ${threshold}"
+    cmd="compute_strains_abundance -i ${directory_output}/gene_level_results.csv -o ${directory_output} -t ${threshold}"
     echo $green$cmd$cyan
     T="$(date +%s)"
     $cmd
