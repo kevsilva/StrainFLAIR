@@ -17,7 +17,9 @@ StrainFLAIR is composed of several modules. Each module of the pipeline is descr
 * [pandas](https://pandas.pydata.org/)
 
 ## Install 
+**Note** StrainFLair dependancies are not satisfied on mac environment. Hence install is currently possible on unix environments only.
 
+Installation may be done with this commands: 
 ```bash
  git clone https://github.com/kevsilva/StrainFLAIR
  cd StrainFLAIR
