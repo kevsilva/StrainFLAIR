@@ -42,7 +42,9 @@ TODO
 
 TODO
 
-## 
+### Output
+
+TODO: description of the output. 
 
 ## StrainFLAIR modules
 
