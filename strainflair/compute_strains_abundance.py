@@ -13,8 +13,8 @@ def compute_strains_abundance_main():
 
     # check arguments
 
-    input_file = "/home/kdasilva/master_project/project_mock_v3/counting_tables/table_mock1a_complete_allgraphs_20201119.csv" #None 
-    out_dir = "/home/kdasilva/strain_profiling_vg/" #None 
+    input_file = None 
+    out_dir = None 
     thr = 0.5
     
     try:
