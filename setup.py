@@ -3,5 +3,5 @@ from shutil import rmtree
 
 setup()
 
-rmtree('./build')
+#rmtree('./build')
 # rmtree('./StrainFlair.egg-info')
