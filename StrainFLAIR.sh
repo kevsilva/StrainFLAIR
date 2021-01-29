@@ -101,20 +101,27 @@ then
         echo " ******************"
         echo "$0 index: indexation of the genes of a set of bacterial genomes."
         echo "Version "$version
-        echo "Usage: ./$0 index -i read_file_of_files -o directory_output_name [OPTIONS]"
-        echo -e "MANDATORY"
+        echo "Usage: $0 index -i file_of_files -o directory_output_name [OPTIONS]"
+        echo -e "\nMANDATORY"
         echo -e "\t -i <file name of a file of file(s) or of a fasta file>"
-        echo -e "\t\t In case of a fasta file: each fasta input line is considered as a genome"
-        echo -e "\t\t In case of a .txt file: each line contains a fasta file, and each of these fasta is considered as a genome. In this case a genome can span several line, for instance for perfectly assembled genomes"
+        echo -e "\t    In case of a fasta file: each fasta input line is considered as a genome"
+        echo -e "\t    In case of a .txt file: each line contains a fasta file, and each of these fasta is considered as a genome. In this case a genome can span several line, for instance for perfectly assembled genomes"
         echo -e "\t -o <directory_output_name>. This directory must not exist. It is created by the program. All results are stored in this directory"
 
         echo -e "\nOPTIONS"
-        echo -e "\t -l value <int value>"
-        echo -e "\t\t Set the length of the sequences on the left and right part of each predicted gene, added to the indexation graph."
-        echo -e "\t\t Default=75"
-        # TODO: options for cdhit
-        echo -e "\t -h"
-        echo -e "\t\t Prints this message and exit\n"
+        echo -e "\t -l value <int value>. Set the length of the sequences on the left and right part of each predicted gene, added to the indexation graph. [default: 75]"
+        echo -e "\t -c value <float value>. Sequence identity threshold [default: 0.95]"
+	echo -e "\t -aS value <float value>. Alignment coverage for the shorter sequence [default: 0.90]"
+	echo -e "\t -g 0 or 1. [default: 1]"
+	echo -e "\t    If set to 0, a sequence is clustered to the first cluster that meet the threshold."
+	echo -e "\t    If set to 1, a sequence is clustered to the most similar cluster that meet the threshold."
+	echo -e "\t -d value <int value>. Length of description in .clstr file [default: 0]"
+	echo -e "\t -M value <int value>. Memory limit (in MB) ; 0 for unlimited. [default: 0]"
+	echo -e "\t -T value <int value>. Number of threads ; with 0, all CPUs will be used. [default: 0]"
+	echo -e "\t -G 0 or 1. [default: 0]"
+	echo -e "\t    If set to 0, use local sequence identity."
+	echo -e "\t    If set to 1, use global sequence identity."
+        echo -e "\t -h Prints this message and exit\n"
     
         echo "Any further question: read the readme file or contact the development team"
     }
@@ -257,7 +264,7 @@ then
     if [ $? -ne 0 ]
     then
         echo "$red there was a problem with the gene clustering$reset"
-        exit 1/Users/ppeterlo/workspace/metacatalogue/scripts/graphs_construction.py
+        exit 1
     fi
     T="$(($(date +%s)-T))"
     echo "$yellow Gene Clustering time in seconds: ${T}$reset"

@@ -25,7 +25,7 @@ Installation may be done with this commands:
  cd StrainFLAIR
  conda env create -p Strain --file env.yml
  conda activate ./Strain
- pip install strainflair
+ pip install ../StrainFLAIR
 ```
 
 
@@ -37,6 +37,40 @@ Installation may be done with this commands:
 `StrainFLAIR.sh` is a pipeline combining the indexation and query steps. Mapping is to be done separately.
 
 TODO
+
+```
+Usage: ./StrainFLAIR.sh [query/index]
+```
+
+```
+Usage: ./StrainFLAIR.sh index -i file_of_files -o directory_output_name [OPTIONS]
+
+MANDATORY
+	 -i <file name of a file of file(s) or of a fasta file>
+	    In case of a fasta file: each fasta input line is considered as a genome
+	    In case of a .txt file: each line contains a fasta file, and each of these fasta is considered as a genome. In this case a genome can span several line, for instance for perfectly assembled genomes
+	 -o <directory_output_name>. This directory must not exist. It is created by the program. All results are stored in this directory
+
+OPTIONS
+	 -l value <int value>. Set the length of the sequences on the left and right part of each predicted gene, added to the indexation graph. [default: 75]
+	 -c value <float value>. Sequence identity threshold [default: 0.95]
+	 -aS value <float value>. Alignment coverage for the shorter sequence [default: 0.90]
+	 -g 0 or 1. [default: 1]
+	    If set to 0, a sequence is clustered to the first cluster that meet the threshold.
+	    If set to 1, a sequence is clustered to the most similar cluster that meet the threshold.
+	 -d value <int value>. Length of description in .clstr file [default: 0]
+	 -M value <int value>. Memory limit (in MB) ; 0 for unlimited. [default: 0]
+	 -T value <int value>. Number of threads ; with 0, all CPUs will be used. [default: 0]
+	 -G 0 or 1. [default: 0]
+	    If set to 0, use local sequence identity.
+	    If set to 1, use global sequence identity.
+	 -h Prints this message and exit
+
+```
+
+```
+Usage: ./StrainFLAIR.sh [query/index]
+```
 
 ### Full indexation and query example
 

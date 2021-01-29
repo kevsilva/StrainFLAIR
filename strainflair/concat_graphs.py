@@ -31,15 +31,15 @@ def setup_logger(name, log_path):
     l.setLevel(logging.DEBUG)
     l.addHandler(fileHandler)
 
-def worker(q: Queue):
+def worker(q: Queue, input_dir: str):
     while True:
         l_clusters = q.get()
         if not l_clusters:
             q.put(None)
             break
-        concat(l_clusters)
+        concat(l_clusters, input_dir)
 
-def concat(l_clusters: list):
+def concat(l_clusters: list, input_dir: str):
 
     subprocess.run(['vg', 'ids', '-j', '-c']+l_clusters)
     with tempfile.NamedTemporaryFile(dir=input_dir,delete=False,suffix=".vg") as out:
@@ -106,7 +106,7 @@ def concat_graphs_main():
             q = Queue() 
 
             # for each steps in parallel
-            processes = Pool(initializer=worker, initargs=(q,))
+            processes = Pool(initializer=worker, initargs=(q,input_dir))
 
             print("fill the queue")
             # fill the queue with list of vg files
