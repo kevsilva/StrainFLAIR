@@ -86,13 +86,13 @@ then
     len_extension=75            # Len of the sequences on the left and right part of each predicted gene, added to the indexation graph.
     directory_output=""         # Name of the directory in which all files are output.
     
-    cdhit_c=0.95                # TODO: comment here + argument
-    cdhit_aS=0.90               # TODO: comment here + argument
-    cdhit_g=1                   # TODO: comment here + argument
-    cdhit_d=0                   # TODO: comment here + argument
-    cdhit_M=0                   # TODO: comment here + argument
-    cdhit_T=0                   # TODO: comment here + argument
-    cdhit_G=0                   # TODO: comment here + argument
+    cdhit_c=0.95                # CD-HIT Sequence identity threshold for clustering
+    cdhit_aS=0.90               # CD-HIT Alignment coverage for the shorter sequence
+    cdhit_g=1                   # CD-HIT Clustering algorithm (sequence clustered to the first vs the best cluster that meet the threshold)
+    cdhit_d=0                   # CD-HIT Length of description in .clstr file
+    cdhit_M=0                   # CD-HIT Memory limit
+    cdhit_T=0                   # CD-HIT Number of threads
+    cdhit_G=0                   # CD-HIT Local or global sequence identity
 
 
     function help_index {
@@ -109,7 +109,9 @@ then
         echo -e "\t -o <directory_output_name>. This directory must not exist. It is created by the program. All results are stored in this directory"
 
         echo -e "\nOPTIONS"
+	echo -e "\ngenes prediction:"
         echo -e "\t -l value <int value>. Set the length of the sequences on the left and right part of each predicted gene, added to the indexation graph. [default: 75]"
+	echo -e "\ngenes clustering:"
         echo -e "\t -c value <float value>. Sequence identity threshold [default: 0.95]"
 	echo -e "\t -aS value <float value>. Alignment coverage for the shorter sequence [default: 0.90]"
 	echo -e "\t -g 0 or 1. [default: 1]"
@@ -121,6 +123,7 @@ then
 	echo -e "\t -G 0 or 1. [default: 0]"
 	echo -e "\t    If set to 0, use local sequence identity."
 	echo -e "\t    If set to 1, use global sequence identity."
+	echo -e "\nglobal:"
         echo -e "\t -h Prints this message and exit\n"
     
         echo "Any further question: read the readme file or contact the development team"
@@ -216,7 +219,7 @@ then
     echo "-Extension len ${len_extension}"
     echo "-cd-hit-est options:"
     echo "  c=${cdhit_c}"
-    echo "  As=${cdhit_aS}"
+    echo "  aS=${cdhit_aS}"
     echo "  g=${cdhit_g}"
     echo "  d=${cdhit_d}"
     echo "  M=${cdhit_M}"
@@ -379,20 +382,15 @@ then
         echo "$0 query: query of reads on a pangenome graph."
         echo "Version "$version
         echo "Usage: ./$0 query -g graph -m mapping_output -p dict_clusters -o output_directory_name [OPTIONS]"
-        echo -e "MANDATORY"
+        echo -e "\nMANDATORY"
         echo -e "\t -g <file name of a graph in GFA format>"
 	echo -e "\t -m <mapping output in json format>"
 	echo -e "\t -p <pickle file containing the dictionary of clusters and their genes>"
-
         echo -e "\t -o <directory_output_name>. This directory must not exist. It is created by the program. All results are stored in this directory"
 
         echo -e "\nOPTIONS"
-        echo -e "\t -t value <float value between [0-1]>"
-        echo -e "\t\t Set the threshold on propotion of detected specific genes."
-        echo -e "\t\t Default=0.5"
-
-        echo -e "\t -h"
-        echo -e "\t\t Prints this message and exit\n"
+        echo -e "\t -t value <float value between [0-1]>. Set the threshold on propotion of detected specific genes. [default=0.5]"
+        echo -e "\t -h Prints this message and exit\n"
     
         echo "Any further question: read the readme file or contact the development team"
     }
@@ -442,7 +440,7 @@ then
             fi
             ;;
         -h|-\?|--help)
-            help_index
+            help_query
             exit 
             ;;
 

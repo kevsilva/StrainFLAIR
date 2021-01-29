@@ -62,10 +62,10 @@ def canonical(node_list: str):
 
 def get_accession_number(line: str):
     accession_number = None
-    line = '_'.join(line.split("_")[:-1])
+    line = '_'.join(line.split("_")[:-1]) # delete gene id
     line = line.split("|")
     for element in line:
-        if re.match("[a-zA-Z0-9]+_[a-zA-Z0-9]+", element):
+        if re.match("[a-zA-Z]+_?[a-zA-Z]*[0-9]+", element):
             accession_number = element
             break
     return accession_number
@@ -707,9 +707,9 @@ def usage():
 #if __name__ == "__main__":
 def json2csv_main():
     
-    graph_file = "/home/kdasilva/master_project/project_mock_v3/final_graphs/all_graphs.gfa" #"final_graph.gfa"
-    pickle_file = "/home/kdasilva/master_project/project_mock_v3/final_graphs/dict_clusters.pickle" #"dict_clusters.pickle"
-    mapping_file = "/home/kdasilva/master_project/project_mock_v3/mapping_mock1a_complete_allgraphs_20201119.json" #"mapping_mix_o104_iai39_k12_100k.json"
+    graph_file = None
+    pickle_file = None
+    mapping_file = None
     output_file_prefix = "res"
     thr = 0.95
     
