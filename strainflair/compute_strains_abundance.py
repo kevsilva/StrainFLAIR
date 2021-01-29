@@ -61,13 +61,13 @@ def compute_strains_abundance_main():
     strains_profile["detected_genes"] = [ input_df.loc[input_df["ratio_covered_nodes"] > 0,columnName].sum()/input_df.loc[:,columnName].sum() for (columnName, columnData) in (input_df.iloc[:,0:(len(input_df.columns)-12)]).iteritems() ]
     # abundances
     strains_profile["mean_abund"] = [ np.mean(input_df.loc[input_df[columnName] > 0,"mean_abund_multiple"]/input_df.loc[input_df[columnName] > 0,columnName]) if strains_profile.loc[columnName,"detected_genes"] > thr else 0 for (columnName, columnData) in (input_df.iloc[:,0:(len(input_df.columns)-12)]).iteritems() ]
-    strains_profile["mean_abund"] /= strains_profile["mean_abund"].sum()/100
+    if strains_profile["mean_abund"].sum() != 0: strains_profile["mean_abund"] /= strains_profile["mean_abund"].sum()/100
     strains_profile["mean_abund_nz"] = [ np.mean(input_df.loc[input_df[columnName] > 0,"mean_abund_multiple_nz"]/input_df.loc[input_df[columnName] > 0,columnName]) if strains_profile.loc[columnName,"detected_genes"] > thr else 0 for (columnName, columnData) in (input_df.iloc[:,0:(len(input_df.columns)-12)]).iteritems() ]
-    strains_profile["mean_abund_nz"] /= strains_profile["mean_abund_nz"].sum()/100
+    if strains_profile["mean_abund_nz"].sum() != 0: strains_profile["mean_abund_nz"] /= strains_profile["mean_abund_nz"].sum()/100
     strains_profile["median_abund"] = [ np.median(input_df.loc[input_df[columnName] > 0,"mean_abund_multiple"]/input_df.loc[input_df[columnName] > 0,columnName]) if strains_profile.loc[columnName,"detected_genes"] > thr else 0 for (columnName, columnData) in (input_df.iloc[:,0:(len(input_df.columns)-12)]).iteritems() ]
-    strains_profile["median_abund"] /= strains_profile["median_abund"].sum()/100
+    if strains_profile["median_abund"].sum() != 0: strains_profile["median_abund"] /= strains_profile["median_abund"].sum()/100
     strains_profile["median_abund_nz"] = [ np.median(input_df.loc[input_df[columnName] > 0,"mean_abund_multiple_nz"]/input_df.loc[input_df[columnName] > 0,columnName]) if strains_profile.loc[columnName,"detected_genes"] > thr else 0 for (columnName, columnData) in (input_df.iloc[:,0:(len(input_df.columns)-12)]).iteritems() ]
-    strains_profile["median_abund_nz"] /= strains_profile["median_abund_nz"].sum()/100
+    if strains_profile["median_abund_nz"].sum() != 0: strains_profile["median_abund_nz"] /= strains_profile["median_abund_nz"].sum()/100
 
     # output
     strains_profile.to_csv(f"{out_dir}/strains_profile.csv")
