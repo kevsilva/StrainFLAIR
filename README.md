@@ -4,8 +4,6 @@
 
 <img src="doc/overview.png" width="500">
 
-
-
 StrainFLAIR is composed of several modules. Each module of the pipeline is described below.
 
 ## Dependencies (all installed by the Install procedure)
@@ -28,19 +26,17 @@ Installation may be done with this commands:
  pip install ../StrainFLAIR
 ```
 
-
-
 ## StrainFLAIR pipeline
 
 ### Usage
 
 `StrainFLAIR.sh` is a pipeline combining the indexation and query steps. Mapping is to be done separately.
 
-TODO
+```
+Usage: ./StrainFLAIR.sh [index/query]
+```
 
-```
-Usage: ./StrainFLAIR.sh [query/index]
-```
+After the indexation step, predicted genes fasta files are stored in `directory_output_name/`, clusters files in `directory_output_name/clusters/`, the graph and its indexes in `directory_output_name/graphs/`.
 
 ```
 Usage: ./StrainFLAIR.sh index -i file_of_files -o directory_output_name [OPTIONS]
@@ -68,17 +64,37 @@ OPTIONS
 
 ```
 
+After the query step, gene-level and strain-level abundances are stored in `directory_output_name/output/`.
+
 ```
-Usage: ./StrainFLAIR.sh [query/index]
+Usage: ././StrainFLAIR.sh query -g graph -m mapping_output -p dict_clusters -o output_directory_name [OPTIONS]
+
+MANDATORY
+	 -g <file name of a graph in GFA format>
+	 -m <mapping output in json format>
+	 -p <pickle file containing the dictionary of clusters and their genes>
+	 -o <directory_output_name>. This directory must not exist. It is created by the program. All results are stored in this directory
+
+OPTIONS
+	 -t value <float value between [0-1]>. Set the threshold on propotion of detected specific genes. [default=0.5]
+	 -h Prints this message and exit
+
 ```
 
 ### Full indexation and query example
 
-TODO
+```
+./StrainFLAIR.sh index -i file_of_files.txt -o myproject
+vg mpmap -x myproject/graphs/all_graphs.xg -g myproject/graphs/all_graphs.gcsa -s myproject/graphs/all_graphs.snarls -f myreads.fastq -t 24 -M 10 -m -L 0 > myproject/mapping_output.gamp
+vg view -j -K myproject/myreads.gamp > myproject/myreads.json
+./StrainFLAIR.sh query -g myproject/graphs/all_graphs.gfa -m myproject/mapping_output.json -p myproject/graphs/dict_clusters.pickle -o myproject/output
+```
 
 ### Output
 
-TODO: description of the output. 
+StrainFLAIR provides two outputs. The first one is a gene-level abundance table, each line is a colored path of the pangenome graph (and hence a gene) containing in columns key characteristics such as the raw read count mapping on the gene or its abundance.
+
+The final output is a strain-level abundance table containing the estimated abundance of each reference genome according to different computations and the proportion of specific genes detected for each strain.
 
 ## StrainFLAIR modules
 
