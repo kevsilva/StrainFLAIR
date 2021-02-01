@@ -1,15 +1,13 @@
 # StrainFLAIR cookbook
 
-TODO
-
 - - - -
 **Prerequisite**
 
-Datasets for this cookbook are available in the folder TODO
+Datasets for this cookbook are available in the folder `data/` containing 4 complete genomes (fasta files) and a mixture of simulated reads with 0.001% of errors composed of 67% of reads from D4 and 33% of reads from LM33 (fastq file).
 
 **Full commands:** For each example, the full commands are proposed at the end of the section.
 
-**Computation time** TODO.
+**Computation time** is approximatel 3 minutes for the indexation step, 3 minutes for the mapping step and 1 minute for the query step.
 - - - -
 
 Consider 4 reference genomes :
@@ -43,7 +41,15 @@ vg view -j -K myproject/mapping_output.gamp > myproject/mapping_output.json
 
 That's it! Results are available in `output/`.
 
-(ouput example)
+```
+,detected_genes,mean_abund,mean_abund_nz,median_abund,median_abund_nz
+NZ_LN874954.1,0.9774620284174425,31.897899712576486,34.90845134147716,31.76353773804796,34.8974830123928
+CP014492.1,0.21266968325791855,0.0,0.0,0.0,0.0
+CP010143.1,0.9890345649582837,68.10210028742353,65.09154865852284,68.23646226195204,65.10251698760719
+AP022815.1,0.07082211638020294,0.0,0.0,0.0,0.0
+```
+
+The final result is a csv table containing each reference genome in line identified by their accession number. Columns contained the proportion of detected genes and the estimated strain-level abundance according to different computation methods. Here we found the initial ratio of around 65-68% for D4 (CP010143.1) and around 31-35% for LM33 (NZ_LN874954.1).
 
 **Full commands:**
 

@@ -389,7 +389,7 @@ then
         echo -e "\t -o <directory_output_name>. This directory must not exist. It is created by the program. All results are stored in this directory"
 
         echo -e "\nOPTIONS"
-        echo -e "\t -t value <float value between [0-1]>. Set the threshold on propotion of detected specific genes. [default=0.5]"
+        echo -e "\t -t value <float value between [0-1]>. Set the threshold on proportion of detected specific genes. [default=0.5]"
         echo -e "\t -h Prints this message and exit\n"
     
         echo "Any further question: read the readme file or contact the development team"
