@@ -1,10 +1,10 @@
 # StrainFLAIR
 
-**StrainFLAIR** (STRAIN-level proFiLing using vArIation gRaph) is a tool for strain identification and quantification that uses variation graph representation of genes sequences. The input is a collection of complete genomes, draft genomes or metagenome-assembled genomes from which genes will be predicted. StrainFLAIR is sub-divided into two main parts: first, an indexing step that stores clusters of reference genes into variation graphs, and then, a query step using mapping of metagenomic reads to infere strain-level abundances in the queried sample.
+**StrainFLAIR** (STRAIN-level proFiLing using vArIation gRaph) is a tool for strain identification and quantification that uses variation graph representation of genes sequences. StrainFLAIR is sub-divided into two main parts: first, an indexing step that stores clusters of reference genes into variation graphs, and then, a query step using mapping of metagenomic reads to infere strain-level abundances in the queried sample. The input for indexation is a collection of complete genomes, draft genomes or metagenome-assembled genomes from which genes will be predicted. The input for query is the so-created graph and any read file. 
 
 <img src="doc/overview.png" width="500">
 
-StrainFLAIR is composed of several modules. Each module of the pipeline is described below.
+StrainFLAIR is composed of several modules. Each module is described below.
 
 ## Dependencies (all installed by the Install procedure)
 * [prodigal](https://github.com/hyattpd/Prodigal)
@@ -30,7 +30,7 @@ Installation may be done with this commands:
 
 ### Usage
 
-`StrainFLAIR.sh` is a pipeline combining the indexation and query steps. Mapping is to be done separately.
+`StrainFLAIR.sh` is a pipeline combining the indexation and query steps. Mapping has to be done separately.
 
 ```
 Usage: ./StrainFLAIR.sh [index/query]
@@ -100,7 +100,7 @@ The final output is a strain-level abundance table containing the estimated abun
 
 #### Module `genes_prediction` : prediction of protein-coding genes from each input sequence
 
-From the input reference sequences, protein-coding genes are predicted using **Prodigal**. To reduce mapping bias at the extremities, predicted genes can be extended on both ends if the reference sequence it originates from allows it.
+From the input reference sequences, protein-coding genes are predicted using **Prodigal**. To reduce mapping bias at the extremities, predicted genes can be extended on both ends (75 bp by default) if the reference sequence it originates from allows it.
 
 Example: `genes_prediction -s file_of_fasta_files.txt -o my_output_directory_name -l 75`
 
