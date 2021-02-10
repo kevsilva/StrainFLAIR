@@ -25,8 +25,8 @@ Installation may be done with this commands:
  conda activate ./Strain
  pip install ../StrainFLAIR
  git clone --recursive https://github.com/ekg/seqwish.git
- git checkout af8354bdb38a075f813d4cc0ad81cb4f038d1be4
  cd seqwish
+ git checkout af8354bdb38a075f813d4cc0ad81cb4f038d1be4
  cmake -H. -Bbuild && cmake --build build -- -j 3
 ```
 
