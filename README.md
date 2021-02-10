@@ -68,19 +68,22 @@ OPTIONS
 
 ```
 
-After the query step, gene-level and strain-level abundances are stored in `directory_output_name/output/`.
+After the query step, mapping files are stored in `directory_output_name/mapping/`, and gene-level and strain-level abundances are stored in `directory_output_name/results/`.
 
 ```
-Usage: ././StrainFLAIR.sh query -g graph -m mapping_output -p dict_clusters -o output_directory_name [OPTIONS]
+Usage: ././StrainFLAIR.sh query -g graph -f1 reads1 -f2 reads2 -t threads -p dict_clusters -d output_directory_name -o output_files_name [OPTIONS]
 
 MANDATORY
-	 -g <file name of a graph in GFA format>
-	 -m <mapping output in json format>
+	 -g <file name of a graph (no format)>
+	 -f1 <single-end reads or pair1 of paired-end reads (fastq or fastq.gz)>
+	 -t <number of threads to use for mapping>
 	 -p <pickle file containing the dictionary of clusters and their genes>
-	 -o <directory_output_name>. This directory must not exist. It is created by the program. All results are stored in this directory
+	 -d <output_directory_name>. Name of the directory in which all files are output.
+	 -o <output_files_name>. Specific name for the output files.
 
 OPTIONS
-	 -t value <float value between [0-1]>. Set the threshold on propotion of detected specific genes. [default=0.5]
+	 -f2 <pair2 of paired-end reads (fastq or fastq.gz)>
+	 -s value <float value between [0-1]>. Set the threshold on proportion of detected specific genes. [default=0.5]
 	 -h Prints this message and exit
 
 ```
@@ -89,9 +92,7 @@ OPTIONS
 
 ```
 ./StrainFLAIR.sh index -i file_of_files.txt -o myproject
-vg mpmap -x myproject/graphs/all_graphs.xg -g myproject/graphs/all_graphs.gcsa -s myproject/graphs/all_graphs.snarls -f myreads.fastq -t 24 -M 10 -m -L 0 > myproject/mapping_output.gamp
-vg view -j -K myproject/myreads.gamp > myproject/myreads.json
-./StrainFLAIR.sh query -g myproject/graphs/all_graphs.gfa -m myproject/mapping_output.json -p myproject/graphs/dict_clusters.pickle -o myproject/output
+./StrainFLAIR.sh query -g myproject/graphs/all_graphs -f1 myproject/myreads.fastq -p myproject/graphs/dict_clusters.pickle -t 24 -d myproject -o test
 ```
 
 ### Output
@@ -156,7 +157,7 @@ Example: `json2csv -g final_graph.gfa -m mapping_output.json -p dict_clusters.pi
 
 Gene-level abundances are converted into strain-level abundances. Strain abundance is set to zero if not metting the threshold of proportion of detected genes.
 
-Example: `compute_strains_abundance -i gene_level_table.csv -o my_output_directory -t proportion_detected_genes_threshold`
+Example: `compute_strains_abundance -i gene_level_table.csv -o output_file_name -t proportion_detected_genes_threshold`
 
 ## Contact
 

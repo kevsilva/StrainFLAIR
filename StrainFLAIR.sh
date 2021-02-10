@@ -384,7 +384,7 @@ then
         echo " ******************"
         echo "$0 query: query of reads on a variation graph."
         echo "Version "$version
-        echo "Usage: ./$0 query -g graph -f1 reads1 -f2 reads2 -t threads -p dict_clusters -d output_directory_name -o output_files_name [OPTIONS]"
+        echo "Usage: $0 query -g graph -f1 reads1 -f2 reads2 -t threads -p dict_clusters -d output_directory_name -o output_files_name [OPTIONS]"
         echo -e "\nMANDATORY"
         echo -e "\t -g <file name of a graph (no format)>"
 	echo -e "\t -f1 <single-end reads or pair1 of paired-end reads (fastq or fastq.gz)>"
@@ -614,7 +614,7 @@ then
     # --------------
     
     echo "${yellow}STRAIN-LEVEL ABUNDANCES$reset"
-    cmd="compute_strains_abundance -i ${directory_output}/genelevel_${filename_output}.csv -o ${directory_output}/results/strainsprofile_${filename_output} -t ${threshold}"
+    cmd="compute_strains_abundance -i ${directory_output}/results/genelevel_${filename_output}.csv -o ${directory_output}/results/strainsprofile_${filename_output} -t ${threshold}"
     echo $green$cmd$cyan
     T="$(date +%s)"
     $cmd
