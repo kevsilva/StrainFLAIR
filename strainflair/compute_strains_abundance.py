@@ -7,7 +7,7 @@ import pandas as pd # read csv and manipulate dataframes
 import numpy as np # basic operations
 
 def usage():
-    print(f"Usage: python {sys.argv[0]} -i input_file (csv) -o out_dir -t thr")
+    print(f"Usage: python {sys.argv[0]} -i input_file (csv) -o out_file -t thr")
 
 #if __name__ == "__main__":
 def compute_strains_abundance_main():
@@ -15,7 +15,7 @@ def compute_strains_abundance_main():
     # check arguments
 
     input_file = None
-    out_dir = None
+    out_file = None
     thr = 0.5
     
     try:
@@ -33,13 +33,13 @@ def compute_strains_abundance_main():
         elif o in ("-i"):
             input_file = a
         elif o in ("-o"):
-            out_dir = a
+            out_file = a
         elif o in ("-t"):
             thr = float(a)
         
         else:
             assert False, "unhandled option"
-    if not input_file or not out_dir: 
+    if not input_file or not out_file: 
         usage()
         exit()
 
@@ -70,4 +70,4 @@ def compute_strains_abundance_main():
     if strains_profile["median_abund_nz"].sum() != 0: strains_profile["median_abund_nz"] /= strains_profile["median_abund_nz"].sum()/100
 
     # output
-    strains_profile.to_csv(f"{out_dir}/strains_profile.csv")
+    strains_profile.to_csv(f"{out_file}.csv")

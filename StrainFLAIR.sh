@@ -369,27 +369,33 @@ fi # END INDEX
 #-----------------------------------------------------------------------------
 if [[ $main ==  "query" ]]
 then
-    graph_data=""               # pangenome graph in GFA format
-    json_data=""                # mapping output in json format
+    graph=""                    # variation graph directory and name (no extensions)
+    reads1=""                   # sequencing reads (pair 1)
+    reads2=""                   # sequencing reads (pair 2)
+    vg_t=16                     # number of threads for mapping
     clusters_data=""            # pickle containing the dictionary for the clusters
     directory_output=""         # Name of the directory in which all files are output.
+    filename_output=""          # Name of the output files.
     threshold=0.5               # threshold on the proportion of detected genes
 	
     function help_query {
         echo " ******************"
         echo " *** HELP query ***"
         echo " ******************"
-        echo "$0 query: query of reads on a pangenome graph."
+        echo "$0 query: query of reads on a variation graph."
         echo "Version "$version
-        echo "Usage: ./$0 query -g graph -m mapping_output -p dict_clusters -o output_directory_name [OPTIONS]"
+        echo "Usage: ./$0 query -g graph -f1 reads1 -f2 reads2 -t threads -p dict_clusters -d output_directory_name -o output_files_name [OPTIONS]"
         echo -e "\nMANDATORY"
-        echo -e "\t -g <file name of a graph in GFA format>"
-	echo -e "\t -m <mapping output in json format>"
+        echo -e "\t -g <file name of a graph (no format)>"
+	echo -e "\t -f1 <single-end reads or pair1 of paired-end reads (fastq or fastq.gz)>"
+        echo -e "\t -t <number of threads to use for mapping>"
 	echo -e "\t -p <pickle file containing the dictionary of clusters and their genes>"
-        echo -e "\t -o <directory_output_name>. This directory must not exist. It is created by the program. All results are stored in this directory"
+        echo -e "\t -d <output_directory_name>. Name of the directory in which all files are output."
+        echo -e "\t -o <output_files_name>. Specific name for the output files."
 
         echo -e "\nOPTIONS"
-        echo -e "\t -t value <float value between [0-1]>. Set the threshold on proportion of detected specific genes. [default=0.5]"
+        echo -e "\t -f2 <pair2 of paired-end reads (fastq or fastq.gz)>"
+        echo -e "\t -s value <float value between [0-1]>. Set the threshold on proportion of detected specific genes. [default=0.5]"
         echo -e "\t -h Prints this message and exit\n"
     
         echo "Any further question: read the readme file or contact the development team"
@@ -400,21 +406,36 @@ then
         case $1 in
         -g) 
             if [ "$2" ] && [ ${2:0:1} != "-" ] ; then # checks that there exists a second value and its is not the start of the next option
-                graph_data=$2
+                graph=$2
                 shift
             else
                 die 'ERROR: "'$1'" option requires a non-empty option argument.'
             fi
             ;;
-        -m) 
+        -f1) 
             if [ "$2" ] && [ ${2:0:1} != "-" ] ; then # checks that there exists a second value and its is not the start of the next option
-                json_data=$2
+                reads1=$2
                 shift
             else
                 die 'ERROR: "'$1'" option requires a non-empty option argument.'
             fi
             ;;
-
+        -f2) 
+            if [ "$2" ] && [ ${2:0:1} != "-" ] ; then # checks that there exists a second value and its is not the start of the next option
+                reads2=$2
+                shift
+            else
+                die 'ERROR: "'$1'" option requires a non-empty option argument.'
+            fi
+            ;;
+        -t) 
+            if [ "$2" ] && [ ${2:0:1} != "-" ] ; then # checks that there exists a second value and its is not the start of the next option
+                vg_t=$2
+                shift
+            else
+                die 'ERROR: "'$1'" option requires a non-empty option argument.'
+            fi
+            ;;
         -p) 
             if [ "$2" ] && [ ${2:0:1} != "-" ] ; then # checks that there exists a second value and its is not the start of the next option
                 clusters_data=$2
@@ -423,7 +444,7 @@ then
                 die 'ERROR: "'$1'" option requires a non-empty option argument.'
             fi
             ;;
-	-o) 
+	-d) 
             if [ "$2" ] && [ ${2:0:1} != "-" ] ; then # checks that there exists a second value and its is not the start of the next option
                 directory_output=$2
                 shift
@@ -431,7 +452,15 @@ then
                 die 'ERROR: "'$1'" option requires a non-empty option argument.'
             fi
             ;;
-       -t) 
+	-o) 
+            if [ "$2" ] && [ ${2:0:1} != "-" ] ; then # checks that there exists a second value and its is not the start of the next option
+                filename_output=$2
+                shift
+            else
+                die 'ERROR: "'$1'" option requires a non-empty option argument.'
+            fi
+            ;;
+       -s) 
             if [ "$2" ] && [ ${2:0:1} != "-" ] ; then # checks that there exists a second value and its is not the start of the next option
                 threshold=$2
                 shift
@@ -469,15 +498,15 @@ then
     # --------------
     # CHECK OPTIONS
     # --------------
-    if [ -z "${graph_data}" ]; then
-        echo "$red Error: You must provide a graph (gfa format) (-g)"
+    if [ -z "${graph}" ]; then
+        echo "$red Error: You must provide a graph (no format) (-g)"
         help_query
         echo $reset
         exit 1
     fi
     
-    if [ -z "${json_data}" ]; then
-        echo "$red Error: You must provide a mapping file (json format) (-m)"
+    if [ -z "${reads1}" ]; then
+        echo "$red Error: You must provide sequencing reads (fastq or fastq.gz format) (-f1)"
         help_query
         echo $reset
         exit 1
@@ -497,33 +526,79 @@ then
         exit 1
     fi
     
-    if [ -f ${directory_output} ] || [ -d ${directory_output} ]; then
-        echo "$red Error: ${directory_output} already exists"
-        help_query
+    if [ ! -d ${directory_output} ]; then
+        mkdir ${directory_output}
+    fi
+    if [ ! -d ${directory_output}/mapping ]; then
+        mkdir ${directory_output}/mapping
+    fi
+    if [ ! -d ${directory_output}/results ]; then
+        mkdir ${directory_output}/results
+    fi
+
+    if [ -f ${directory_output}/mapping/mapping_${filename_output}.gamp ] || [ -f ${directory_output}/mapping/mapping_${filename_output}.gamp ] || [ -f ${directory_output}/results/genelevel_${filename_output}.csv ] || [ -f ${directory_output}/results/strainsprofile_${filename_output}.csv ] ; then
+        echo "$red Error: ${filename_output} is already used!"
+        help_index
         echo $reset
         exit 1
     fi
-    mkdir ${directory_output}
     
     # --------------
     # RECAP OPTIONS
     # --------------
     echo -e "$yellow"
     echo "QUERY OPTIONS:"
-    echo "-Graph file ${graph_data}"
-    echo "-Mapping file ${json_data}"
+    echo "-Graph file ${graph}"
+    echo "-Reads file ${reads1} ${reads2}"
+    echo "-Number of threads ${vg_t}"
     echo "-Clusters dictionary ${clusters_data}"
     echo "-Output results in directory ${directory_output}"
     echo "-Threshold on proportion of detected genes ${threshold}"
     echo -e "$reset"
     
+    # --------------
+    # MAPPING
+    # --------------
+    
+    echo "${yellow}MAPPING$reset"
+    if [ -z "${reads2}" ]
+    then
+    	cmd="vg mpmap -x ${graph}.xg -g ${graph}.gcsa -s ${graph}.snarls -f ${reads1} -t ${vg_t} -M 10 -m -L 0" # > ${directory_output}/mapping/mapping_${filename_output}.gamp"
+    else
+    	cmd="vg mpmap -x ${graph}.xg -g ${graph}.gcsa -s ${graph}.snarls -f ${reads1} -f ${reads2} -t ${vg_t} -M 10 -m -L 0" # > ${directory_output}/mapping/mapping_${filename_output}.gamp"
+    fi
+    echo "$green$cmd > ${directory_output}/mapping/mapping_${filename_output}.gamp $cyan"
+    $cmd > ${directory_output}/mapping/mapping_${filename_output}.gamp
+    T="$(date +%s)"
+    $cmd
+    if [ $? -ne 0 ]
+    then
+        echo "$red there was a problem with the mapping$reset"
+        exit 1
+    fi
+    T="$(($(date +%s)-T))"
+    echo "$yellow Mapping computation time in seconds: ${T}$reset"
+
+    echo "${yellow}GAMP TO JSON FORMAT$reset"
+    cmd="vg view -j -K ${directory_output}/mapping/mapping_${filename_output}.gamp"
+    echo "$green$cmd > ${directory_output}/mapping/mapping_${filename_output}.json $cyan"
+    T="$(date +%s)"
+    $cmd > ${directory_output}/mapping/mapping_${filename_output}.json
+    if [ $? -ne 0 ]
+    then
+        echo "$red there was a problem with the JSON conversion$reset"
+        exit 1
+    fi
+    T="$(($(date +%s)-T))"
+    echo "$yellow JSON conversion time in seconds: ${T}$reset"
+
     
     # --------------
     # GENE-LEVEL
     # --------------
     
     echo "${yellow}GENE-LEVEL ABUNDANCES$reset"
-    cmd="json2csv -g ${graph_data} -m ${json_data} -p ${clusters_data} -o ${directory_output}/gene_level_results"
+    cmd="json2csv -g ${graph_data} -m ${json_data} -p ${clusters_data} -o ${directory_output}/genelevel_${filename_output}"
     echo $green$cmd$cyan
     T="$(date +%s)"
     $cmd
@@ -540,7 +615,7 @@ then
     # --------------
     
     echo "${yellow}STRAIN-LEVEL ABUNDANCES$reset"
-    cmd="compute_strains_abundance -i ${directory_output}/gene_level_results.csv -o ${directory_output} -t ${threshold}"
+    cmd="compute_strains_abundance -i ${directory_output}/genelevel_${filename_output}.csv -o ${directory_output}/strainsprofile_${filename_output} -t ${threshold}"
     echo $green$cmd$cyan
     T="$(date +%s)"
     $cmd
