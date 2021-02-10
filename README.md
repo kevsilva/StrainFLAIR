@@ -24,6 +24,10 @@ Installation may be done with this commands:
  conda env create -p Strain --file env.yml
  conda activate ./Strain
  pip install ../StrainFLAIR
+ git clone --recursive https://github.com/ekg/seqwish.git
+ git checkout af8354bdb38a075f813d4cc0ad81cb4f038d1be4
+ cd seqwish
+ cmake -H. -Bbuild && cmake --build build -- -j 3
 ```
 
 ## StrainFLAIR pipeline
@@ -92,7 +96,15 @@ vg view -j -K myproject/myreads.gamp > myproject/myreads.json
 
 ### Output
 
-StrainFLAIR provides two outputs. The first one is a gene-level abundance table, each line is a colored path of the pangenome graph (and hence a gene) containing in columns key characteristics such as the raw read count mapping on the gene or its abundance.
+StrainFLAIR provides two outputs. The first one is a gene-level abundance table, each line is a colored path of the pangenome graph (and hence a gene) containing in columns key characteristics :
+- The corresponding gene identifier.
+- For each reference genome, the number of copies of the gene. Since each unique version of a gene is represented once in the graph, whereas it can exist in several copies in the genome (duplicate genes), the counts and abundances computed correspond to the sum of those copies. Keeping track of the number of copies is important to normalize the counts.
+- The cluster identifier to which the colored path belongs.
+- For unique mapped reads: their raw number and their number normalized by the sequence length. 
+- For unique plus multiple mapped reads: their raw number and their number normalized by the sequence length.
+- The mean abundance of the nodes composing the path. Instead of solely counting reads, we make full use of the graph structure and we propose abundances of each node as explained in the manuscript. Hence, for each colored path, the gene abundance is estimated by the mean of the nodes abundance.
+- In order to not underestimate the abundance in case of a lack of sequencing depth (which could result in certain nodes to never be traversed by sequencing reads), StrainFLAIR also outputs the mean abundance without the nodes of the path never covered by a read. The same way reads counts are computed using unique mapped reads only or all mapped reads, the mean abundance with and without these none covered nodes are computed in both situations.
+- The ratio of covered nodes, defined as the proportion of nodes from the path which abundance is strictly greater than zero.
 
 The final output is a strain-level abundance table containing the estimated abundance of each reference genome according to different computations and the proportion of specific genes detected for each strain.
 

@@ -1,4 +1,4 @@
-data/D4.fasta
-data/JE86.fasta
-data/LM33.fasta
-data/MVAST0167.fasta
+data/minimal_example/D4.fasta
+data/minimal_example/JE86.fasta
+data/minimal_example/LM33.fasta
+data/minimal_example/MVAST0167.fasta
