@@ -538,7 +538,7 @@ then
 
     if [ -f ${directory_output}/mapping/mapping_${filename_output}.gamp ] || [ -f ${directory_output}/mapping/mapping_${filename_output}.gamp ] || [ -f ${directory_output}/results/genelevel_${filename_output}.csv ] || [ -f ${directory_output}/results/strainsprofile_${filename_output}.csv ] ; then
         echo "$red Error: ${filename_output} is already used!"
-        help_index
+        help_query
         echo $reset
         exit 1
     fi
@@ -568,9 +568,8 @@ then
     	cmd="vg mpmap -x ${graph}.xg -g ${graph}.gcsa -s ${graph}.snarls -f ${reads1} -f ${reads2} -t ${vg_t} -M 10 -m -L 0" # > ${directory_output}/mapping/mapping_${filename_output}.gamp"
     fi
     echo "$green$cmd > ${directory_output}/mapping/mapping_${filename_output}.gamp $cyan"
-    $cmd > ${directory_output}/mapping/mapping_${filename_output}.gamp
     T="$(date +%s)"
-    $cmd
+    $cmd > ${directory_output}/mapping/mapping_${filename_output}.gamp
     if [ $? -ne 0 ]
     then
         echo "$red there was a problem with the mapping$reset"
@@ -598,7 +597,7 @@ then
     # --------------
     
     echo "${yellow}GENE-LEVEL ABUNDANCES$reset"
-    cmd="json2csv -g ${graph_data} -m ${json_data} -p ${clusters_data} -o ${directory_output}/genelevel_${filename_output}"
+    cmd="json2csv -g ${graph}.gfa -m ${directory_output}/mapping/mapping_${filename_output}.json -p ${clusters_data} -o ${directory_output}/results/genelevel_${filename_output}"
     echo $green$cmd$cyan
     T="$(date +%s)"
     $cmd
@@ -615,7 +614,7 @@ then
     # --------------
     
     echo "${yellow}STRAIN-LEVEL ABUNDANCES$reset"
-    cmd="compute_strains_abundance -i ${directory_output}/genelevel_${filename_output}.csv -o ${directory_output}/strainsprofile_${filename_output} -t ${threshold}"
+    cmd="compute_strains_abundance -i ${directory_output}/genelevel_${filename_output}.csv -o ${directory_output}/results/strainsprofile_${filename_output} -t ${threshold}"
     echo $green$cmd$cyan
     T="$(date +%s)"
     $cmd
