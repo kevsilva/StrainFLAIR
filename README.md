@@ -19,15 +19,17 @@ StrainFLAIR is composed of several modules. Each module is described below.
 
 Installation may be done with this commands: 
 ```bash
- git clone https://github.com/kevsilva/StrainFLAIR
- cd StrainFLAIR
- conda env create -p Strain --file env.yml
- conda activate ./Strain
- pip install ../StrainFLAIR
- git clone --recursive https://github.com/ekg/seqwish.git
- cd seqwish
- git checkout af8354bdb38a075f813d4cc0ad81cb4f038d1be4
- cmake -H. -Bbuild && cmake --build build -- -j 3
+git clone https://github.com/kevsilva/StrainFLAIR
+cd StrainFLAIR
+conda env create -p Strain --file env.yml
+conda activate ./Strain
+pip install ../StrainFLAIR
+git clone --recursive https://github.com/ekg/seqwish.git
+cd seqwish
+git checkout af8354bdb38a075f813d4cc0ad81cb4f038d1be4
+cmake -H. -Bbuild && cmake --build build -- -j 3
+cd ..
+cp seqwish/bin/seqwish Strain/bin/
 ```
 
 ## StrainFLAIR pipeline
