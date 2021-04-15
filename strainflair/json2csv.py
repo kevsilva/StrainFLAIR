@@ -566,7 +566,7 @@ def parse_vgmpmap(json_file_name:str, pangenome: Pangenome, thr=0.95):
     """
     
     # Optimization: we detect positions in the file of reads with unique mapping. Thus they are not tested twice
-    do_not_recompute_line = set()
+    recompute_line = set()
     
     # DO TWICE THE JOB: Once for detecting the abundance of unique mapped reads 
     # FIRST PASS/ 
@@ -589,10 +589,10 @@ def parse_vgmpmap(json_file_name:str, pangenome: Pangenome, thr=0.95):
                 break
 
             if len(mapped_paths) == 0: 
-                do_not_recompute_line.add(current_seek)
                 continue # no path found
 
             if len(mapped_paths) > 1: 
+                recompute_line.add(current_seek)  # we will recompute those alignments during the second pass
                 continue # Here we deal only with reads mapping exactly one path
 
             aligned_path = mapped_paths[0]  # for clarity
@@ -605,7 +605,6 @@ def parse_vgmpmap(json_file_name:str, pangenome: Pangenome, thr=0.95):
             if len(found_gene_paths) > 1: 
                 continue
             
-            do_not_recompute_line.add(current_seek) # we will not recompute those alignments during the second pass
             for found_gene_path in found_gene_paths:
                 path_id = found_gene_path[0]
                 starting_node_id = found_gene_path[1]
@@ -645,7 +644,7 @@ def parse_vgmpmap(json_file_name:str, pangenome: Pangenome, thr=0.95):
             steps += 1
             current_seek = json_file.tell() 
             if steps%1000==0: update_progress(current_seek/size_file)
-            if current_seek in do_not_recompute_line: 
+            if current_seek not in recompute_line: 
                 json_file.readline() # dont care
                 continue
             mapped_paths, aligned_read = get_all_alignments_one_read(json_file, pangenome, thr)
