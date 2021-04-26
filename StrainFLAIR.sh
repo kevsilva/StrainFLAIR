@@ -234,7 +234,17 @@ then
     
     # Gene Prediction
     echo "${yellow}GENE PREDICTION$reset"
-    cmd="genes_prediction -s ${input_data} -o ${directory_output} -l ${len_extension}"
+
+    cmd="mkdir ${directory_output}/predicted_genes"
+    echo $green$cmd$cyan
+    $cmd
+    if [ $? -ne 0 ]
+    then
+        echo "$red there was a problem with the gene prediction$reset"
+        exit 1
+    fi
+
+    cmd="genes_prediction -s ${input_data} -o ${directory_output}/predicted_genes -l ${len_extension}"
     echo $green$cmd$cyan
     T="$(date +%s)"
     $cmd
@@ -260,7 +270,7 @@ then
         exit 1
     fi
     
-    cmd="cd-hit-est -i ${directory_output}/all_genes.fasta -o ${directory_output}/clusters/all_genes_clusters -c ${cdhit_c} -aS ${cdhit_aS} -g ${cdhit_g} -d ${cdhit_d} -M ${cdhit_M} -T ${cdhit_T} -G ${cdhit_G}"
+    cmd="cd-hit-est -i ${directory_output}/predicted_genes/all_genes.fasta -o ${directory_output}/clusters/all_genes_clusters -c ${cdhit_c} -aS ${cdhit_aS} -g ${cdhit_g} -d ${cdhit_d} -M ${cdhit_M} -T ${cdhit_T} -G ${cdhit_G}"
     echo $green$cmd$cyan
     T="$(date +%s)"
     $cmd
@@ -286,7 +296,7 @@ then
         exit 1
     fi
     
-    cmd="graphs_construction -s ${directory_output}/all_genes_extended.fasta -c ${directory_output}/clusters/all_genes_clusters.clstr -o ${directory_output}/graphs"
+    cmd="graphs_construction -s ${directory_output}/predicted_genes/all_genes_extended.fasta -c ${directory_output}/clusters/all_genes_clusters.clstr -o ${directory_output}/graphs"
     echo $green$cmd$cyan
     T="$(date +%s)"
     $cmd
