@@ -554,6 +554,16 @@ def get_all_alignments_one_read(json_file, pangenome: Pangenome, thr=0.95):
 
 def parse_vgmpmap(json_file_name:str, pangenome: Pangenome, thr=0.95):
     
+    global FILTERED
+    global UNASSIGNED
+    global ASSIGNED_U
+    global ASSIGNED_M
+
+    FILTERED = 0
+    UNASSIGNED = 0
+    ASSIGNED_U = 0
+    ASSIGNED_M = 0
+
     """
     PARSE MAPPING JSON FILE
     First check all alignments from the same read
@@ -566,7 +576,7 @@ def parse_vgmpmap(json_file_name:str, pangenome: Pangenome, thr=0.95):
     """
     
     # Optimization: we detect positions in the file of reads with unique mapping. Thus they are not tested twice
-    do_not_recompute_line = set()
+    recompute_read = set()
     
     # DO TWICE THE JOB: Once for detecting the abundance of unique mapped reads 
     # FIRST PASS/ 
@@ -586,15 +596,17 @@ def parse_vgmpmap(json_file_name:str, pangenome: Pangenome, thr=0.95):
             
             # end of file
             if mapped_paths == None:
+                recompute_read.add(current_seek) # needed to enable the break during second pass
                 break
 
             if len(mapped_paths) == 0: 
-                do_not_recompute_line.add(current_seek)
+                FILTERED += 1
                 continue # no path found
 
             if len(mapped_paths) > 1: 
+                recompute_read.add(current_seek)
                 continue # Here we deal only with reads mapping exactly one path
-
+            
             aligned_path = mapped_paths[0]  # for clarity
             aligned_path_as_nodes = [n[0] for n in aligned_path.mapped_node_ids_cov]
             found_gene_paths = pangenome.get_matching_path(aligned_path_as_nodes) 
@@ -603,9 +615,14 @@ def parse_vgmpmap(json_file_name:str, pangenome: Pangenome, thr=0.95):
                 found_gene_paths += pangenome.get_matching_path(aligned_path_as_nodes[::-1])
             # we may have several paths corresponding to a unique alignment
             if len(found_gene_paths) > 1: 
+                recompute_read.add(current_seek)
                 continue
             
-            do_not_recompute_line.add(current_seek) # we will not recompute those alignments during the second pass
+            if len(found_gene_paths) == 0: 
+                UNASSIGNED += 1
+            else:
+                ASSIGNED_U += 1
+
             for found_gene_path in found_gene_paths:
                 path_id = found_gene_path[0]
                 starting_node_id = found_gene_path[1]
@@ -645,7 +662,7 @@ def parse_vgmpmap(json_file_name:str, pangenome: Pangenome, thr=0.95):
             steps += 1
             current_seek = json_file.tell() 
             if steps%1000==0: update_progress(current_seek/size_file)
-            if current_seek in do_not_recompute_line: 
+            if current_seek not in recompute_read: 
                 json_file.readline() # dont care
                 continue
             mapped_paths, aligned_read = get_all_alignments_one_read(json_file, pangenome, thr)
@@ -655,12 +672,16 @@ def parse_vgmpmap(json_file_name:str, pangenome: Pangenome, thr=0.95):
                 break
 
             # we retreive the paths corresponding to this alignments:
+            flag = False
             for aligned_path in mapped_paths:
                 aligned_path_as_nodes = [n[0] for n in aligned_path.mapped_node_ids_cov]
                 found_gene_paths = pangenome.get_matching_path(aligned_path_as_nodes) 
                 # don't duplicate the result if the path has only one node
                 if len(aligned_path_as_nodes) > 1:
                     found_gene_paths += pangenome.get_matching_path(aligned_path_as_nodes[::-1]) 
+
+                if len(found_gene_paths) > 0:
+                    flag=True
                 
                 # compute a+b+c (cf earlier comments)
                 sum_covered_paths = 0
@@ -692,7 +713,10 @@ def parse_vgmpmap(json_file_name:str, pangenome: Pangenome, thr=0.95):
                     for i in range(nb_mapped_nodes):
                         path.multiple_mapped_abundances[starting_node_id+i]+=aligned_path.mapped_node_ids_cov[i][1]*ratio
                     
-                
+            if flag:
+                ASSIGNED_M += 1
+            else:
+                UNASSIGNED += 1    
                 
     update_progress(1)
 
@@ -702,11 +726,9 @@ def parse_vgmpmap(json_file_name:str, pangenome: Pangenome, thr=0.95):
 def usage():
     print(f"Usage: python {sys.argv[0]} -g graph_file_name (gfa) -m mapped_file_name (json) -p dictionary_file_name (pickle) -t alignment_score_threshold -o prefix_output_files_name")
 
-    
 
-#if __name__ == "__main__":
 def json2csv_main():
-    
+
     graph_file = None
     pickle_file = None
     mapping_file = None
@@ -753,7 +775,12 @@ def json2csv_main():
     panpan.print_error_distribution(dist_err_file_name)
 
     print(f"Done, csv results are in {output_file_csv_name}, and error distribution are in {dist_err_file_name}")
-
+    print(f"Number of filtered reads = {FILTERED}")
+    print(f"Number of unassigned reads = {UNASSIGNED}")
+    print(f"Number of assigned reads (unique) = {ASSIGNED_U}")
+    print(f"Number of assigned reads (multiple) = {ASSIGNED_M}")
+    TOTAL = FILTERED+UNASSIGNED+ASSIGNED_U+ASSIGNED_M
+    print(f"total = {TOTAL}")
             
 
    
