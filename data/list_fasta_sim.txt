@@ -1,0 +1,7 @@
+data/manuscript_simulated_dataset/references/ecoli_iai39.fasta
+data/manuscript_simulated_dataset/references/ecoli_k12_mg1655.fasta
+data/manuscript_simulated_dataset/references/ecoli_o104h4_2011c-3493.fasta
+data/manuscript_simulated_dataset/references/ecoli_o157h16_santai.fasta
+data/manuscript_simulated_dataset/references/ecoli_o157h7_sakai.fasta
+data/manuscript_simulated_dataset/references/ecoli_RM8426.fasta
+data/manuscript_simulated_dataset/references/ecoli_se15.fasta
