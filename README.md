@@ -161,6 +161,12 @@ Gene-level abundances are converted into strain-level abundances. Strain abundan
 
 Example: `compute_strains_abundance -i gene_level_table.csv -o output_file_name -t proportion_detected_genes_threshold`
 
+## Use cases
+
+This repository presents two manuals to use StrainFLAIR on example datasets.
+`MINIMAL_EXAMPLE.md` is a manual to apply StrainFLAIR on a minimal set of references to index and reads to query, providing quick results.
+`COOKBOOK.md` is a cookbook allowing to reproduce the results presented in the StrainFLAIR paper on the simulated datasets.
+
 ## Contact
 
 Kévin Da Silva: kevin.da-silva@inria.fr

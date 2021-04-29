@@ -1,4 +1,0 @@
-data/minimal_example/D4.fasta
-data/minimal_example/JE86.fasta
-data/minimal_example/LM33.fasta
-data/minimal_example/MVAST0167.fasta
