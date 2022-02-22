@@ -758,17 +758,7 @@ def parse_vgmpmap(json_file_name:str, pangenome: Pangenome, thr=0.95, force_se=F
     PAIRS = 0
     SINGLES = 0
     FILTERED = 0
-    global d_filt
-    d_filt = {}
-    d_filt["o104"] = 0
-    d_filt["iai39"] = 0
-    d_filt["third"] = 0
     UNASSIGNED = 0
-    global d_unassign
-    d_unassign = {}
-    d_unassign["o104"] = 0
-    d_unassign["iai39"] = 0
-    d_unassign["third"] = 0
     ASSIGNED_U = 0
     ASSIGNED_M = 0
     INCONSIST = 0
@@ -844,28 +834,9 @@ def parse_vgmpmap(json_file_name:str, pangenome: Pangenome, thr=0.95, force_se=F
                 if len(mapped_paths["r1"]["paths"]) == 0 and len(mapped_paths["r2"]["paths"]) == 0: 
                     FILTERED += 2
 
-                    ### to delete after test
-                    if "o104" in mapped_paths['r1']['name']:
-                        d_filt["o104"] += 2
-                    elif "iai39" in mapped_paths['r1']['name']:
-                        d_filt["iai39"] += 2
-                    else:
-                        d_filt["third"] += 2
-                    ### end
-
                 # 1. one of the read has no align = go to single-end style
                 elif len(mapped_paths["r1"]["paths"]) == 0 or len(mapped_paths["r2"]["paths"]) == 0:
                     FILTERED += 1
-
-                    ### to delete after test
-                    if "o104" in mapped_paths['r1']['name']:
-                        d_filt["o104"] += 1
-                    elif "iai39" in mapped_paths['r1']['name']:
-                        d_filt["iai39"] += 1
-                    else:
-                        d_filt["third"] += 1
-                    ### end
-
                     ONE_NOALIGN += 1
                     key_to_remove = "r1" if len(mapped_paths["r1"]["paths"]) == 0 else "r2"
                     if key_to_remove == "r1":
@@ -898,15 +869,6 @@ def parse_vgmpmap(json_file_name:str, pangenome: Pangenome, thr=0.95, force_se=F
                     if len(mapped_paths["r1"]["colored_match"]) == 0 and len(mapped_paths["r2"]["colored_match"]) == 0: 
                         UNASSIGNED += 2
 
-                        ### to delete after test
-                        if "o104" in mapped_paths['r1']['name']:
-                            d_unassign["o104"] += 2
-                        elif "iai39" in mapped_paths['r1']['name']:
-                            d_unassign["iai39"] += 2
-                        else:
-                            d_unassign["third"] += 2
-                        ### end
-
                         # fill clusters with unassigned reads (but alignments with several paths possibilities for the same cluster are not treated)
                         # no shared counts for clusters as it would add noise for the incompatibility check afterwards
                         for key in mapped_paths:
@@ -934,15 +896,6 @@ def parse_vgmpmap(json_file_name:str, pangenome: Pangenome, thr=0.95, force_se=F
                         UNASSIGNED += 1
                         ONE_NOCP += 1
                         key_to_remove = "r1" if len(mapped_paths["r1"]["colored_match"]) == 0 else "r2"
-
-                        ### to delete after test
-                        if "o104" in mapped_paths['r1']['name']:
-                            d_unassign["o104"] += 1
-                        elif "iai39" in mapped_paths['r1']['name']:
-                            d_unassign["iai39"] += 1
-                        else:
-                            d_unassign["third"] += 1
-                        ### end
 
                         # fill clusters with unassigned reads
                         traversed_clusters = [pangenome.paths[ pangenome.nodes[ p.mapped_nodes_id[0] ].traversed_path[0]].cluster_id for p in mapped_paths[key_to_remove]["paths"]]
@@ -1078,16 +1031,7 @@ def parse_vgmpmap(json_file_name:str, pangenome: Pangenome, thr=0.95, force_se=F
                         continue                    
                     if len(match_paths) == 0: 
                         UNASSIGNED += 1
-
-                        ### to delete after test
-                        if "o104" in name:
-                            d_unassign["o104"] += 1
-                        elif "iai39" in name:
-                            d_unassign["iai39"] += 1
-                        else:
-                            d_unassign["third"] += 1   
-                        ### end
-                                             
+      
                         # add info to corresponding cluster
                         traversed_cluster = pangenome.paths[ pangenome.nodes[ aligned_path.mapped_nodes_id[0] ].traversed_path[0]].cluster_id
                         pangenome.clusters[traversed_cluster].reads_name.append(name) # to delete after test
@@ -1328,12 +1272,6 @@ def parse_vgmpmap(json_file_name:str, pangenome: Pangenome, thr=0.95, force_se=F
                         SE_M += 1
                     else:
                         UNASSIGNED += 1    
-                        if "o104" in name:
-                            d_unassign["o104"] += 1
-                        elif "iai39" in name:
-                            d_unassign["iai39"] += 1
-                        else:
-                            d_unassign["third"] += 1
     update_progress(1)
 
     for i in range(len(pangenome.clusters)):
@@ -1344,23 +1282,8 @@ def usage():
     print(f"Usage: python {sys.argv[0]} -g graph_file_name (gfa) -m mapped_file_name (json) -p dictionary_file_name (pickle) -t alignment_score_threshold -o prefix_output_files_name -f")
 
 
-if __name__ == "__main__":
-    '''
-    graph_file = "/home/kdasilva/master_project/project_mock_v3/final_graphs/all_graphs.gfa"
-    pickle_file = "/home/kdasilva/master_project/project_mock_v3/final_graphs/dict_clusters.pickle"
-    mapping_file = "/home/kdasilva/master_project/project_mock_v3/mapping_mock1a_complete_allgraphs_20201119.json"
-    output_file_prefix = "res"
-    '''
-
-    '''
-    graph_file = "/home/kdasilva/sevens_2021/vg1.35/graphs/all_graphs.gfa"
-    pickle_file = "/home/kdasilva/sevens_2021/vg1.35/graphs/dict_clusters.pickle"
-    mapping_file = "/home/kdasilva/sevens_2021/vg1.35/mapping/mapping_mixpairedgenesonly_o104_iai39_bl21.json"
-    output_file_prefix = "res_ecoli"
-    thr = 0.95
-    force_se = False
+def json2csv_main():
     
-    '''
     graph_file = None
     pickle_file = None
     mapping_file = None
@@ -1431,7 +1354,5 @@ if __name__ == "__main__":
     print(f"{ASSIGNED_U} reads have been assigned during the first step (unique mapping).")
     print(f"{ASSIGNED_M} reads have been assigned during the second step (multiple mapping).")
     print(f"In total, {ASSIGNED_U+ASSIGNED_M} ({(ASSIGNED_U+ASSIGNED_M)/NB_READS*100}%) reads were used.")
-    print(d_filt)
-    print(d_unassign)
 
    

@@ -92,7 +92,7 @@ def cluster2graph(cluster_name: str, d_clusters: dict, d_IdToSeq: dict, out_dir:
             if err.decode() != "":
                 subprocess.run(f"vg view -Fv {temp_dir}/cluster_temp.gfa | vg mod -X 256 - | vg sort - > {out_dir}/{cluster_name}.vg",shell=True)
 
-if __name__ == "__main__":
+def graphs_construction_main():
     
     # arguments
     parser = argparse.ArgumentParser()

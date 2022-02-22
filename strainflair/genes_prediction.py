@@ -59,7 +59,7 @@ def predict_genes(fasta_file: str, out_dir: str, len_extend: int):
                 record_dict[idt].description = ""
                 SeqIO.write(record_dict[idt][start-1:end], output_handle, "fasta")
 
-if __name__ == "__main__":
+def genes_prediction_main():
     
     # arguments
     parser = argparse.ArgumentParser()

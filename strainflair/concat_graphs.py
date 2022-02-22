@@ -51,7 +51,7 @@ def file_generator(input_dir: str):
         if entry.name.endswith('.vg'):
             yield entry.name
 
-if __name__ == "__main__":
+def concat_graphs_main():
 
     # arguments
     parser = argparse.ArgumentParser()

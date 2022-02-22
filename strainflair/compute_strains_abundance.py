@@ -9,7 +9,7 @@ import numpy as np # basic operations
 def usage():
     print(f"Usage: python {sys.argv[0]} -i input_file (csv) -o out_file -t thr")
 
-if __name__ == "__main__":
+def compute_strains_abundance_main():
 
     # check arguments
 
