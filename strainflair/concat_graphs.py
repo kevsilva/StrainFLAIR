@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import subprocess
-import sys
-import getopt
-import logging # log.txt with times
-import time
+import subprocess # run vg
+import argparse # manage arguments
+import logging # log file
+import time # timer
 import os
 import tempfile
 from multiprocessing import Queue, Process, Pool, Lock, cpu_count, Manager # multiprocessing
@@ -47,45 +46,22 @@ def concat(l_clusters: list, input_dir: str):
         subprocess.run(['vg','combine'] + l_clusters, stdout=out)
     subprocess.run(['rm']+l_clusters)
 
-def file_generator(input_dir):
+def file_generator(input_dir: str):
     for entry in os.scandir(input_dir):
         if entry.name.endswith('.vg'):
             yield entry.name
 
-def usage():
-    print(f"Usage: python3 {sys.argv[0]} -i input_dir -s step")
+if __name__ == "__main__":
 
-#if __name__ == "__main__":
-def concat_graphs_main():
-    # check arguments
-
-    input_dir = None 
-    step = 1000
-
-    try:
-        opts, _ = getopt.getopt(sys.argv[1:], "hi:s:")
-    
-    except getopt.GetoptError as err:
-        # print help information and exit:
-        print(err) # will print something like "option -a not recognized"
-        usage()
-        sys.exit(2)
-
-    for o, a in opts:
-        if o in ("-h", "--help"):
-            usage()
-        elif o in ("-i"):
-            input_dir = a      
-        elif o in ("-s"):
-            step = int(a) 
-        else:
-            assert False, "unhandled option"
-    if not input_dir or not step: 
-        usage()
-        exit()
+    # arguments
+    parser = argparse.ArgumentParser()
+    required_args = parser.add_argument_group('required arguments')
+    required_args.add_argument('-i', '--input_dir', type=str, required=True, help='Graphs to concatenate directory.')
+    parser.add_argument('-s', '--step', type=int, default=1000, help='Number of graphs to concatenate at once. Default: 1000')
+    args = parser.parse_args()
         
     # logger
-    setup_logger("logger", f"{input_dir}/concat_grahs_log.txt")
+    setup_logger("logger", f"{args.input_dir}/concat_grahs.log")
     logger = logging.getLogger("logger")
 
     # start
@@ -96,26 +72,26 @@ def concat_graphs_main():
         with Timer() as _t:
             
             print(f"start step {stage}")
-            nb_files = int(subprocess.check_output(f"find {input_dir} -maxdepth 1 -name '*.vg' | wc -l",shell=True))
+            nb_files = int(subprocess.check_output(f"find {args.input_dir} -maxdepth 1 -name '*.vg' | wc -l",shell=True))
             if nb_files == 1:
-                final_file = [f for f in os.listdir(input_dir) if f.endswith(".vg")][0]
-                os.rename(f"{input_dir}/{final_file}", f"{input_dir}/all_graphs.vg")
+                final_file = [f for f in os.listdir(args.input_dir) if f.endswith(".vg")][0]
+                os.rename(f"{args.input_dir}/{final_file}", f"{args.input_dir}/all_graphs.vg")
                 break
 
             # queue initialization
             q = Queue() 
 
             # for each steps in parallel
-            processes = Pool(initializer=worker, initargs=(q,input_dir))
+            processes = Pool(initializer=worker, initargs=(q,args.input_dir))
 
             print("fill the queue")
             # fill the queue with list of vg files
             ct = 0
             l_clusters = []
-            for vg_file in file_generator(input_dir):
-                l_clusters.append(f"{input_dir}/{vg_file}")
+            for vg_file in file_generator(args.input_dir):
+                l_clusters.append(f"{args.input_dir}/{vg_file}")
                 ct+=1
-                if ct==step:
+                if ct==args.step:
                     q.put(l_clusters)
                     ct = 0
                     l_clusters = []

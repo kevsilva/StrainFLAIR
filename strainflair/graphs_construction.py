@@ -3,12 +3,12 @@
 
 import subprocess # execute vg
 from Bio import SeqIO # conversion to dict and to sequence
-import sys # manage arguments
-import getopt # manage arguments
+import argparse # manage arguments
+import os
 from multiprocessing import Queue, Process, Pool, Lock, cpu_count # multiprocessing
 from tempfile import TemporaryDirectory # temporary fasta and paf file for each cluster
 import time # times stored in log
-import logging # log.txt with times
+import logging # log file
 import pickle # save d_clusters
 
 class Timer:
@@ -54,7 +54,7 @@ def clstr2dict(clstr_file: str):
                     d_clusters[cluster_name]['len_rep'] = int(split_line[1][:-3])
     return d_clusters
 
-def worker(q: Queue, d_clusters, d_IdToSeq, out_dir: str):
+def worker(q: Queue, d_clusters: dict, d_IdToSeq: dict, out_dir: str):
     while True:
         cluster_name = q.get()
         if not cluster_name:
@@ -62,11 +62,13 @@ def worker(q: Queue, d_clusters, d_IdToSeq, out_dir: str):
             break
         cluster2graph(cluster_name, d_clusters, d_IdToSeq, out_dir)
 
-def cluster2graph(cluster_name: str, d_clusters, d_IdToSeq, out_dir: str):
+def cluster2graph(cluster_name: str, d_clusters: dict, d_IdToSeq: dict, out_dir: str):
 
     '''
-    graph construction
-    input = cluster_name
+    Graph construction
+    Create a temporary fasta with all the gene sequences from the cluster specified.
+    If there is only one sequence, create a linear graph with vg construct.
+    If there is more than one sequence, use minimap2 for sequence alignment and seqwish to convert it into a graph.
     '''
 
     # creating temporary files in a temporary folder
@@ -90,76 +92,54 @@ def cluster2graph(cluster_name: str, d_clusters, d_IdToSeq, out_dir: str):
             if err.decode() != "":
                 subprocess.run(f"vg view -Fv {temp_dir}/cluster_temp.gfa | vg mod -X 256 - | vg sort - > {out_dir}/{cluster_name}.vg",shell=True)
 
-def usage():
-    print(f"Usage: python3 {sys.argv[0]} -s in_sequences (fasta) -c in_clusters -o out_dir -l min_length (float)")
-
-
-#if __name__ == "__main__":
-def graphs_construction_main():
-    # check arguments
-
-    in_sequences = None 
-    in_clusters = None 
-    out_dir = None 
-    min_length = 0
+if __name__ == "__main__":
     
-    try:
-        opts, _ = getopt.getopt(sys.argv[1:], "hs:c:o:l:")
-    
-    except getopt.GetoptError as err:
-        # print help information and exit:
-        print(err) # will print something like "option -a not recognized"
-        usage()
-        sys.exit(2)
+    # arguments
+    parser = argparse.ArgumentParser()
+    required_args = parser.add_argument_group('required arguments')
+    required_args.add_argument('-s', '--in_sequences', type=str, required=True, help='Input gene sequences in a fasta file.')
+    required_args.add_argument('-c', '--in_clusters', type=str, required=True, help='Input clusters file (clstr ouput file from CD-HIT).')
+    parser.add_argument('-o', '--out_dir', type=str, default="graphs", help='Output directory. Default: "graphs"')
+    parser.add_argument('-l', '--min_length', type=float, default=0, help='Threshold on the cluster representative length. Default: 0')
+    args = parser.parse_args()
 
-    for o, a in opts:
-        if o in ("-h", "--help"):
-            usage()
-        elif o in ("-s"):
-            in_sequences = a
-        elif o in ("-c"):
-            in_clusters = a
-        elif o in ("-o"):
-            out_dir = a
-        elif o in ("-l"):
-            min_length = float(a)
-        
-        else:
-            assert False, "unhandled option"
-    if not in_sequences or not in_clusters or not out_dir: 
-        usage()
-        exit()
+    # create output directory
+    if not os.path.exists(args.out_dir):
+        subprocess.run(["mkdir",args.out_dir])
 
     # logger
-    setup_logger("logger", f"{out_dir}/graph_construction_log.txt")
+    setup_logger("logger", f"{args.out_dir}/graph_construction.log")
     logger = logging.getLogger("logger")
 
     # start pipeline
 
     # sequence file into dictionary (key = sequence Id, value = sequence)
-    d_IdToSeq = SeqIO.to_dict(SeqIO.parse(in_sequences, "fasta"))
+    d_IdToSeq = SeqIO.to_dict(SeqIO.parse(args.in_sequences, "fasta"))
 
     # cluster file into dictionary (key = cluster id, value = gene list + length of representative sequence)
-    d_clusters = clstr2dict(in_clusters)
-    pickle_out = open(out_dir+"/dict_clusters.pickle","wb")
+    d_clusters = clstr2dict(args.in_clusters)
+    pickle_out = open(args.out_dir+"/dict_clusters.pickle","wb")
     pickle.dump(d_clusters, pickle_out)
     pickle_out.close()
 
     with Timer() as _t:
         # queue initialization (for clusters)
+        nb_clusters = 0
         q = Queue() 
 
         # construct graph for each cluster in parallel
-        processes = Pool(initializer=worker, initargs=(q, d_clusters, d_IdToSeq, out_dir))
+        processes = Pool(initializer=worker, initargs=(q, d_clusters, d_IdToSeq, args.out_dir))
 
         # fill the queue with the clusters to process
         for cluster_name in d_clusters:
-            if d_clusters[cluster_name]['len_rep'] >= min_length:
+            if d_clusters[cluster_name]['len_rep'] >= args.min_length:
+                nb_clusters += 1
                 q.put(cluster_name)
         q.put(None)
 
         # end multiprocessing
         processes.close()
         processes.join()
+    logger.info(f"Number of graphs built: {nb_clusters}")
     logger.info(f"Multiprocessed graphs building done in: {_t.t}")
 

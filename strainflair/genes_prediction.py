@@ -4,8 +4,7 @@
 import subprocess # execute vg
 import os
 from Bio import SeqIO # conversion to dict and to sequence
-import sys # manage arguments
-import getopt # manage arguments
+import argparse
 from multiprocessing import Queue, Process, Pool, Lock, cpu_count # multiprocessing
 import time # times stored in log
 import logging # log.txt with times
@@ -40,7 +39,6 @@ def worker(q: Queue, out_dir: str, len_extend: int):
 
 
 def predict_genes(fasta_file: str, out_dir: str, len_extend: int):
-    print(f"out_dir is {out_dir}")
     fasta_basename = os.path.basename(os.path.splitext(fasta_file)[0])
     subprocess.check_call(f"prodigal -i {fasta_file} -o {out_dir}/predGenes_{fasta_basename}.txt -d {out_dir}/predGenes_{fasta_basename}.fasta",shell=True)
     p1 = subprocess.Popen(["grep",">",f"{out_dir}/predGenes_{fasta_basename}.fasta"], stdout=subprocess.PIPE)
@@ -61,50 +59,24 @@ def predict_genes(fasta_file: str, out_dir: str, len_extend: int):
                 record_dict[idt].description = ""
                 SeqIO.write(record_dict[idt][start-1:end], output_handle, "fasta")
 
-def usage():
-    print(f"Usage: python {sys.argv[0]} -s in_sequences (fasta or txt) -o out_dir -l len_extend (int)")
-
-#if __name__ == "__main__":
-def genes_prediction_main():
-    # check arguments
-
-    in_sequences = None 
-    out_dir = None 
-    len_extend = 0
+if __name__ == "__main__":
     
-    try:
-        opts, _ = getopt.getopt(sys.argv[1:], "hs:o:l:")
-    
-    except getopt.GetoptError as err:
-        # print help information and exit:
-        print(err) # will print something like "option -a not recognized"
-        usage()
-        sys.exit(2)
-
-    for o, a in opts:
-        if o in ("-h", "--help"):
-            usage()
-        elif o in ("-s"):
-            in_sequences = a
-        elif o in ("-o"):
-            out_dir = a
-        elif o in ("-l"):
-            len_extend = int(a)
-        
-        else:
-            assert False, "unhandled option"
-    if not in_sequences or not out_dir: 
-        usage()
-        exit()
+    # arguments
+    parser = argparse.ArgumentParser()
+    required_args = parser.add_argument_group('required arguments')
+    required_args.add_argument('-s', '--in_sequences', type=str, required=True, help='Input sequence(s) in a fasta file or in a text file listing fasta file paths.')
+    parser.add_argument('-o', '--out_dir', type=str, default="predicted_genes", help='Output directory. Default: "predicted_genes"')
+    parser.add_argument('-l', '--len_extend', type=int, default=0, help='Number of bases to extend the length of the predicted genes at both ends. Default: 0')
+    args = parser.parse_args()
 
     # start
 
     # create output directory
-    if not os.path.exists(out_dir):
-        subprocess.run(["mkdir",out_dir])
+    if not os.path.exists(args.out_dir):
+        subprocess.run(["mkdir",args.out_dir])
 
     # setup logger
-    setup_logger("logger", f"{out_dir}/genes_prediction_log.txt")
+    setup_logger("logger", f"{args.out_dir}/genes_prediction.log")
     logger = logging.getLogger("logger")
 
     # genes prediction
@@ -113,13 +85,13 @@ def genes_prediction_main():
         q = Queue() 
 
         # predict genes for each fasta in parallel
-        processes = Pool(initializer=worker, initargs=(q, out_dir, len_extend))
+        processes = Pool(initializer=worker, initargs=(q, args.out_dir, args.len_extend))
 
         # fill the queue with the files to process
-        if in_sequences.endswith(".fasta") or in_sequences.endswith(".fna"):
-            q.put(in_sequences)
+        if args.in_sequences.endswith(".fasta") or args.in_sequences.endswith(".fna"):
+            q.put(args.in_sequences)
         else:
-            with open(in_sequences) as f:
+            with open(args.in_sequences) as f:
                 for fasta_file in f:
                     q.put(fasta_file.rstrip("\n"))
         q.put(None)
@@ -129,13 +101,13 @@ def genes_prediction_main():
         processes.join()
     
     # concatenate
-    subprocess.run(f"cat `ls -v {out_dir}/*.fasta | grep -v 'extended'` > {out_dir}/all_genes.fasta",shell=True)
-    subprocess.run(f"cat $(ls -v {out_dir}/*extended*.fasta) > {out_dir}/all_genes_extended.fasta",shell=True)
+    subprocess.run(f"cat `ls -v {args.out_dir}/*.fasta | grep -v 'extended'` > {args.out_dir}/all_genes.fasta",shell=True)
+    if args.len_extend != 0: subprocess.run(f"cat $(ls -v {args.out_dir}/*extended*.fasta) > {args.out_dir}/all_genes_extended.fasta",shell=True)
 
     logger.info(f"Multiprocessed genes prediction done in: {_t.t}")
 
     nb_genes = 0
-    with open(f"{out_dir}/all_genes.fasta","r") as f:
+    with open(f"{args.out_dir}/all_genes.fasta","r") as f:
         for line in f:
             if line.startswith(">"):
                 nb_genes += 1
