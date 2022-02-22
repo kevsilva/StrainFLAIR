@@ -1288,7 +1288,7 @@ def json2csv_main():
     pickle_file = None
     mapping_file = None
     output_file_prefix = None
-    
+    thr = 0.95
     force_se = False
     
     try:
