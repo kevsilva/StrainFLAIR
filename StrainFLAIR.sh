@@ -607,7 +607,7 @@ then
     # --------------
     
     echo "${yellow}GENE-LEVEL ABUNDANCES$reset"
-    cmd="json2csv -g ${graph}.gfa -m ${directory_output}/mapping/mapping_${filename_output}.json -p ${clusters_data} -o ${directory_output}/results/genelevel_${filename_output}"
+    cmd="json2csv -g ${graph}.gfa -m ${directory_output}/mapping/mapping_${filename_output}.json -p ${clusters_data} -o ${directory_output}/results/${filename_output}_gene_table"
     echo $green$cmd$cyan
     T="$(date +%s)"
     $cmd
@@ -624,7 +624,7 @@ then
     # --------------
     
     echo "${yellow}STRAIN-LEVEL ABUNDANCES$reset"
-    cmd="compute_strains_abundance -i ${directory_output}/results/genelevel_${filename_output}.csv -o ${directory_output}/results/strainsprofile_${filename_output} -t ${threshold}"
+    cmd="compute_strains_abundance -i ${directory_output}/results/${filename_output}_gene_table.csv -o ${directory_output}/results/${filename_output}_strains_profile -t ${threshold}"
     echo $green$cmd$cyan
     T="$(date +%s)"
     $cmd
