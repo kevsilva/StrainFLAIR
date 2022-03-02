@@ -607,7 +607,7 @@ then
     # --------------
     
     echo "${yellow}GENE-LEVEL ABUNDANCES$reset"
-    cmd="json2csv -g ${graph}.gfa -m ${directory_output}/mapping/mapping_${filename_output}.json -p ${clusters_data} -o ${directory_output}/results/${filename_output}_gene_table"
+    cmd="json2csv -g ${graph}.gfa -m ${directory_output}/mapping/mapping_${filename_output}.json -p ${clusters_data} -o ${directory_output}/results/${filename_output}"
     echo $green$cmd$cyan
     T="$(date +%s)"
     $cmd
