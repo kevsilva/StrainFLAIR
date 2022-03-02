@@ -13,6 +13,7 @@ StrainFLAIR is composed of several modules. Each module is described below.
 * [seqwish](https://github.com/ekg/seqwish)
 * [vg](https://github.com/vgteam/vg)
 * [pandas](https://pandas.pydata.org/)
+* [networkx](https://networkx.org/)
 
 ## Install 
 **Note** StrainFLair dependancies are not satisfied on mac environment. Hence install is currently possible on unix environments only.
